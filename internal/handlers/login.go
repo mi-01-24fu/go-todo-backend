@@ -3,52 +3,69 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"go-todo-backend/internal/service"
+	"fmt"
+	"io/ioutil"
 	"net/http"
-	"regexp"
+
+	commonMailAddress "github.com/mi-01-24fu/go-todo-backend/internal/common/mail_address"
+	commonUserName "github.com/mi-01-24fu/go-todo-backend/internal/common/user_name"
+	"github.com/mi-01-24fu/go-todo-backend/internal/service"
 )
 
-const regex = `^[a-zA-Z0-9_+-]+(.[a-zA-Z0-9_+-]+)*@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}$`
+// LoginHandler は login リクエストを受けてログインが可能かの判定結果を返します
+func LoginHandler(w http.ResponseWriter, req *http.Request) {
 
-/*
-MailAddress, UserNameを受け取る
-dataがあるかの確認を行う
-*/
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
-
-	body := make([]byte, r.ContentLength)
-	r.Body.Read(body)
-
-	var loginInfo service.LoginInfo
-
-	if err := json.Unmarshal([]byte(body), &loginInfo); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	// リクエストデータの存在有無チェック
+	loginInfo, err := checkRequestData(req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	err := checkRequestData(loginInfo)
+	// リクエストデータのバリデーションチェック
+	err = checkValidation(loginInfo)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	// ログイン判定処理呼出し
 	result, err := service.VerifyLogin(loginInfo)
+	fmt.Println(result)
 }
 
-func checkRequestData(data LoginInfo) error {
+// checkRequestData は望むリクエストデータが送られてきているかを確認します
+func checkRequestData(req *http.Request) (service.LoginInfo, error) {
 
-	if data.MailAddress == "" {
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		return service.LoginInfo{}, errors.New("リクエストデータを読み込めません: " + err.Error())
+	}
+
+	var loginInfo service.LoginInfo
+
+	if err := json.Unmarshal(body, &loginInfo); err != nil {
+		return service.LoginInfo{}, errors.New("json形式から構造体への変換に失敗しました")
+	}
+	return loginInfo, nil
+}
+
+// checkValidation はリクエストデータのバリデーションチェックを行います
+func checkValidation(data service.LoginInfo) error {
+
+	if !commonMailAddress.IsEmpty(data.MailAddress) {
 		return errors.New("MailAddress が入力されていません")
 	}
 
-	if !regexp.MustCompile(regex).MatchString(data.MailAddress) {
+	if !commonMailAddress.CheckValidation(data.MailAddress) {
 		return errors.New("MailAddress の形式が正しくありません")
 	}
 
-	if data.UserName == "" {
+	if !commonUserName.IsEmpty(data.UserName) {
 		return errors.New("UserName が入力されていません")
 	}
 
-	if len(data.UserName) < 3 && len(data.UserName) > 12 {
+	if !commonUserName.CheckLength(data.UserName) {
 		return errors.New("UserName の文字数が不正です")
 	}
 	return nil

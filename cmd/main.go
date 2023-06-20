@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"go-todo-backend/internal/handlers"
+	"github.com/mi-01-24fu/go-todo-backend/internal/handlers"
 	"net/http"
 )
 
