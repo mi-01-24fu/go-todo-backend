@@ -1,4 +1,4 @@
-package infrastructure
+package login
 
 import (
 	"context"
@@ -16,11 +16,6 @@ type TodoList struct {
 	Description string `json:"description,omitempty"`
 }
 
-type AccessLoginInfo interface {
-	Get(context.Context) (TodoList, error)
-}
-
-func (r LoginInfo) Get(ctx context.Context) (TodoList, error) {	
-	
+func (r LoginInfo) Get(ctx context.Context) (TodoList, error) {
 	return TodoList{}, nil
 }

@@ -3,19 +3,19 @@ package service
 import (
 	"context"
 
-	"github.com/mi-01-24fu/go-todo-backend/internal/infrastructure"
+	"github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/login"
 )
 
 // VerifyLogin はログイン可否を判定します
-func VerifyLogin(ctx context.Context, loginInfo infrastructure.LoginInfo) (infrastructure.TodoList, error) {
+func VerifyLogin(ctx context.Context, loginInfo login.LoginInfo) (login.TodoList, error) {
 
 	todoList, err := loginInfo.Get(ctx)
 	if err != nil {
-		return infrastructure.TodoList{}, err
+		return login.TodoList{}, err
 	}
 
 	// テスト用
-	todoList = infrastructure.TodoList{
+	todoList = login.TodoList{
 		UserId:      1,
 		TodoId:      1,
 		ActiveTask:  "トイレしなきゃ",
