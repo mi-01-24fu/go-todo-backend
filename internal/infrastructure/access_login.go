@@ -2,8 +2,12 @@ package infrastructure
 
 import (
 	"context"
-	"github.com/mi-01-24fu/go-todo-backend/internal/service"
 )
+
+type LoginInfo struct {
+	MailAddress string `json:"mail_address,omitempty"`
+	UserName    string `json:"user_name,omitempty"`
+}
 
 type TodoList struct {
 	UserId      int    `json:"user_id,omitempty"`
@@ -16,4 +20,7 @@ type AccessLoginInfo interface {
 	Get(context.Context) (TodoList, error)
 }
 
-func (r LoginInfo) Get(ctx context.Context) (TodoList, error) {}
+func (r LoginInfo) Get(ctx context.Context) (TodoList, error) {	
+	
+	return TodoList{}, nil
+}

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,11 +10,14 @@ import (
 
 	commonMailAddress "github.com/mi-01-24fu/go-todo-backend/internal/common/mail_address"
 	commonUserName "github.com/mi-01-24fu/go-todo-backend/internal/common/user_name"
+	"github.com/mi-01-24fu/go-todo-backend/internal/infrastructure"
 	"github.com/mi-01-24fu/go-todo-backend/internal/service"
 )
 
 // LoginHandler は login リクエストを受けてログインが可能かの判定結果を返します
 func LoginHandler(w http.ResponseWriter, req *http.Request) {
+
+	ctx := context.Background()
 
 	// リクエストデータの存在有無チェック
 	loginInfo, err := checkRequestData(req)
@@ -30,28 +34,28 @@ func LoginHandler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// ログイン判定処理呼出し
-	result, err := service.VerifyLogin(loginInfo)
+	result, err := service.VerifyLogin(ctx, loginInfo)
 	fmt.Println(result)
 }
 
 // checkRequestData は望むリクエストデータが送られてきているかを確認します
-func checkRequestData(req *http.Request) (service.LoginInfo, error) {
+func checkRequestData(req *http.Request) (infrastructure.LoginInfo, error) {
 
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		return service.LoginInfo{}, errors.New("リクエストデータを読み込めません: " + err.Error())
+		return infrastructure.LoginInfo{}, errors.New("リクエストデータを読み込めません: " + err.Error())
 	}
 
-	var loginInfo service.LoginInfo
+	var loginInfo infrastructure.LoginInfo
 
 	if err := json.Unmarshal(body, &loginInfo); err != nil {
-		return service.LoginInfo{}, errors.New("json形式から構造体への変換に失敗しました")
+		return infrastructure.LoginInfo{}, errors.New("json形式から構造体への変換に失敗しました")
 	}
 	return loginInfo, nil
 }
 
 // checkValidation はリクエストデータのバリデーションチェックを行います
-func checkValidation(data service.LoginInfo) error {
+func checkValidation(data infrastructure.LoginInfo) error {
 
 	if !commonMailAddress.IsEmpty(data.MailAddress) {
 		return errors.New("MailAddress が入力されていません")
