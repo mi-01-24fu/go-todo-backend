@@ -1,4 +1,4 @@
-package mail_address
+package mailaddress
 
 import (
 	"testing"

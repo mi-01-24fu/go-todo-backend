@@ -1,4 +1,4 @@
-package user_name
+package username
 
 import (
 	"testing"

@@ -27,4 +27,12 @@ goの実装に関しては、PRのみChatGPTを利用し、
 コードを見せてもらったりはしない
 調べて分からない部分だけ聞く
 
+-------------------------------
+下記成功
+mockgen `
+-source internal/infrastructure/signup/access_sign_up.go `
+-destination internal/infrastructure/signup/mock_access_sign_up.go `
+-package signup
 
+
+C:\Users\mifui\Documents\go-todo-backend\internal\infrastructure\signup\access_sign_up.go
