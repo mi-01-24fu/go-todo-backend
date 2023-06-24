@@ -2,20 +2,46 @@ package login
 
 import (
 	"context"
+	"database/sql"
+	"errors"
+	"fmt"
+
+	_ "github.com/go-sql-driver/mysql" // init関数を実行するためにimport
+
+	"github.com/mi-01-24fu/go-todo-backend/models"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
-type LoginInfo struct {
+// UserInfo は クライアントから渡されたログイン情報を保持する構造体です
+type UserInfo struct {
 	MailAddress string `json:"mail_address,omitempty"`
 	UserName    string `json:"user_name,omitempty"`
 }
 
-type TodoList struct {
-	UserId      int    `json:"user_id,omitempty"`
-	TodoId      int    `json:"todo_id,omitempty"`
-	ActiveTask  string `json:"active_task,omitempty"`
-	Description string `json:"description,omitempty"`
+// VerifyLoginResult は クライアントから渡されたユーザー情報をもとにDBへデータが存在するかの問い合わせをした結果を格納します
+type VerifyLoginResult struct {
+	UserID    int  `json:"user_id"`
+	LoginFlag bool `json:"login_flag"`
 }
 
-func (r LoginInfo) Get(ctx context.Context) (TodoList, error) {
-	return TodoList{}, nil
+// Get は users テーブルから user 情報を取得します
+func (r UserInfo) Get(ctx context.Context) (models.User, error) {
+
+	db, err := sql.Open("mysql", "root:root@tcp(127.0.0.1:3306)/todo_app")
+	if err != nil {
+		fmt.Println(err)
+		return models.User{}, errors.New("システム障害：大変申し訳ありませんが、一定時間間隔を空けてログインしてください。")
+	}
+	defer db.Close()
+
+	user, err := models.Users(
+		qm.Where("user_name=?", r.UserName),
+		qm.Where("mail_address=?", r.MailAddress),
+	).One(ctx, db)
+
+	if err != nil {
+		return models.User{}, err
+	}
+
+	return *user, err
 }

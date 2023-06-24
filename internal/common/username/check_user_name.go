@@ -1,4 +1,4 @@
-package user_name
+package username
 
 const minNamelength = 3
 const maxNamelength = 12
