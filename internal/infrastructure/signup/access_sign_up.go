@@ -24,18 +24,19 @@ type RegistrationRequest struct {
 	MailAddress string `json:"mail_address,omitempty"`
 }
 
-// SignUpService は ユーザー情報を登録するためのインターフェース
-type SignUpService interface {
+// Service は ユーザー情報を登録するためのインターフェース
+type Service interface {
 	Count(string) (int64, error)
 	SignUp(RegistrationRequest) (VerifySignUpResult, error)
 }
 
-// SignUpServiceImpl は AccessSignUp を満たす構造体
-type SignUpServiceImpl struct {
+// ServiceImpl は AccessSignUp を満たす構造体
+type ServiceImpl struct {
 	DB *sql.DB
 }
 
-func (a SignUpServiceImpl) Count(mailaddress string) (int64, error) {
+// Count は新規会員登録者のメールアドレスが既に登録済みかを確認します
+func (a ServiceImpl) Count(mailaddress string) (int64, error) {
 	ctx := context.Background()
 
 	m, err := models.Users(
@@ -55,7 +56,7 @@ func (a SignUpServiceImpl) Count(mailaddress string) (int64, error) {
 }
 
 // SignUp はユーザー情報をDBへ登録する処理を行う
-func (a SignUpServiceImpl) SignUp(signUpInfo RegistrationRequest) (VerifySignUpResult, error) {
+func (a ServiceImpl) SignUp(signUpInfo RegistrationRequest) (VerifySignUpResult, error) {
 
 	ctx := context.Background()
 

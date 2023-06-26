@@ -1,5 +1,6 @@
 package consts
 
+// 複数利用されるエラー文を定義しています
 const (
 	SystemError            = "システムエラーが発生しました。時間をおいて再度お試しください。"
 	EmptyUserName          = "UserName が入力されていません"

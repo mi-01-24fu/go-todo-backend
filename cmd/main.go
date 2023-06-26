@@ -90,7 +90,7 @@ func (d dbConfig) signUp(w http.ResponseWriter, req *http.Request) {
 	}
 	defer db.Close()
 
-	accessRepo := access.SignUpServiceImpl{DB: db}
+	accessRepo := access.ServiceImpl{DB: db}
 	signUpRepo := signup.AccessInfo{AccessRepo: accessRepo}
 	signUpService := handlers.NewSignUpService(signUpRepo, accessRepo)
 	result, err := signUpService.SignUp(w, req)
