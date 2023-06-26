@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/mi-01-24fu/go-todo-backend/internal/consts"
 	"github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/signup"
 	mock "github.com/mi-01-24fu/go-todo-backend/internal/service/signup"
 )
@@ -37,7 +38,7 @@ func TestSignUpService_SignUp(t *testing.T) {
 		{
 			"正常/VerifySignUpResultとnilを返却する",
 			func(msu *mock.MockSignUp) {
-				msu.EXPECT().VerifySignUp(signup.NewMemberInfo{UserName: "mifu", MailAddress: "inogan38@gmail.com"}).Return(signup.VerifySignUpResult{UserID: 1, LoginFlag: true}, nil)
+				msu.EXPECT().VerifySignUp(signup.RegistrationRequest{UserName: "mifu", MailAddress: "inogan38@gmail.com"}).Return(signup.VerifySignUpResult{UserID: 1, LoginFlag: true}, nil)
 			},
 			args{
 				w:   httptest.NewRecorder(),
@@ -52,7 +53,7 @@ func TestSignUpService_SignUp(t *testing.T) {
 		{
 			"準正常/VerifySignUpResult{}とerrorを返却する/UserNameが空",
 			func(msu *mock.MockSignUp) {
-				msu.EXPECT().VerifySignUp(signup.NewMemberInfo{UserName: "", MailAddress: "inogan38@gmail.com"}).Return(signup.VerifySignUpResult{}, errors.New("UserName が入力されていません"))
+				msu.EXPECT().VerifySignUp(signup.RegistrationRequest{UserName: "", MailAddress: "inogan38@gmail.com"}).Return(signup.VerifySignUpResult{}, errors.New(consts.EmptyUserName))
 			},
 			args{
 				w:   httptest.NewRecorder(),
@@ -67,7 +68,7 @@ func TestSignUpService_SignUp(t *testing.T) {
 		{
 			"準正常/VerifySignUpResult{}とerrorを返却する/MailAddressが空",
 			func(msu *mock.MockSignUp) {
-				msu.EXPECT().VerifySignUp(signup.NewMemberInfo{UserName: "mifu", MailAddress: ""}).Return(signup.VerifySignUpResult{}, errors.New("MailAddress が入力されていません"))
+				msu.EXPECT().VerifySignUp(signup.RegistrationRequest{UserName: "mifu", MailAddress: ""}).Return(signup.VerifySignUpResult{}, errors.New(consts.EmptyMailAddress))
 			},
 			args{
 				w:   httptest.NewRecorder(),
@@ -129,7 +130,7 @@ func TestSignUpService_SignUp(t *testing.T) {
 }
 
 func conversionReqBody(userName, mailAddress string) *bytes.Buffer {
-	userInfo := signup.NewMemberInfo{
+	userInfo := signup.RegistrationRequest{
 		UserName:    userName,
 		MailAddress: mailAddress,
 	}

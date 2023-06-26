@@ -8,7 +8,6 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-//		"github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/signup"
 )
 
 // MockAccessSignUp is a mock of AccessSignUp interface.
@@ -34,8 +33,23 @@ func (m *MockAccessSignUp) EXPECT() *MockAccessSignUpMockRecorder {
 	return m.recorder
 }
 
+// Count mocks base method.
+func (m *MockAccessSignUp) Count(arg0 string) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Count", arg0)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Count indicates an expected call of Count.
+func (mr *MockAccessSignUpMockRecorder) Count(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Count", reflect.TypeOf((*MockAccessSignUp)(nil).Count), arg0)
+}
+
 // SignUp mocks base method.
-func (m *MockAccessSignUp) SignUp(arg0 NewMemberInfo) (VerifySignUpResult, error) {
+func (m *MockAccessSignUp) SignUp(arg0 RegistrationRequest) (VerifySignUpResult, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignUp", arg0)
 	ret0, _ := ret[0].(VerifySignUpResult)

@@ -3,8 +3,9 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
+	"log"
 
+	"github.com/mi-01-24fu/go-todo-backend/internal/consts"
 	login "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/login"
 )
 
@@ -25,7 +26,7 @@ func (VerifyLoginInfo) VerifyLogin(ctx context.Context, loginInfo login.UserInfo
 
 	if err != nil {
 		if err.Error() == noRecord {
-			fmt.Println(err)
+			log.Print(err)
 			return login.VerifyLoginResult{
 				UserID:    0,
 				LoginFlag: false,
@@ -33,8 +34,8 @@ func (VerifyLoginInfo) VerifyLogin(ctx context.Context, loginInfo login.UserInfo
 		}
 	}
 	if err != nil {
-		fmt.Println(err)
-		return login.VerifyLoginResult{}, errors.New("システム障害：大変申し訳ありませんが、一定時間間隔を空けてログインしてください。")
+		log.Print(err)
+		return login.VerifyLoginResult{}, errors.New(consts.SystemError)
 	}
 
 	returnTodoList := login.VerifyLoginResult{

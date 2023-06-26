@@ -28,8 +28,6 @@ type Todo struct {
 	UserID      null.Int    `boil:"user_id" json:"user_id,omitempty" toml:"user_id" yaml:"user_id,omitempty"`
 	ActiveTask  string      `boil:"active_task" json:"active_task" toml:"active_task" yaml:"active_task"`
 	Description null.String `boil:"description" json:"description,omitempty" toml:"description" yaml:"description,omitempty"`
-	CreatedAt   time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt   time.Time   `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
 	R *todoR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L todoL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -40,15 +38,11 @@ var TodoColumns = struct {
 	UserID      string
 	ActiveTask  string
 	Description string
-	CreatedAt   string
-	UpdatedAt   string
 }{
 	ID:          "id",
 	UserID:      "user_id",
 	ActiveTask:  "active_task",
 	Description: "description",
-	CreatedAt:   "created_at",
-	UpdatedAt:   "updated_at",
 }
 
 var TodoTableColumns = struct {
@@ -56,15 +50,11 @@ var TodoTableColumns = struct {
 	UserID      string
 	ActiveTask  string
 	Description string
-	CreatedAt   string
-	UpdatedAt   string
 }{
 	ID:          "todos.id",
 	UserID:      "todos.user_id",
 	ActiveTask:  "todos.active_task",
 	Description: "todos.description",
-	CreatedAt:   "todos.created_at",
-	UpdatedAt:   "todos.updated_at",
 }
 
 // Generated where
@@ -161,41 +151,16 @@ func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
-type whereHelpertime_Time struct{ field string }
-
-func (w whereHelpertime_Time) EQ(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.EQ, x)
-}
-func (w whereHelpertime_Time) NEQ(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.NEQ, x)
-}
-func (w whereHelpertime_Time) LT(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpertime_Time) LTE(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpertime_Time) GT(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
 var TodoWhere = struct {
 	ID          whereHelperint
 	UserID      whereHelpernull_Int
 	ActiveTask  whereHelperstring
 	Description whereHelpernull_String
-	CreatedAt   whereHelpertime_Time
-	UpdatedAt   whereHelpertime_Time
 }{
 	ID:          whereHelperint{field: "`todos`.`id`"},
 	UserID:      whereHelpernull_Int{field: "`todos`.`user_id`"},
 	ActiveTask:  whereHelperstring{field: "`todos`.`active_task`"},
 	Description: whereHelpernull_String{field: "`todos`.`description`"},
-	CreatedAt:   whereHelpertime_Time{field: "`todos`.`created_at`"},
-	UpdatedAt:   whereHelpertime_Time{field: "`todos`.`updated_at`"},
 }
 
 // TodoRels is where relationship names are stored.
@@ -219,9 +184,9 @@ func (*todoR) NewStruct() *todoR {
 type todoL struct{}
 
 var (
-	todoAllColumns            = []string{"id", "user_id", "active_task", "description", "created_at", "updated_at"}
+	todoAllColumns            = []string{"id", "user_id", "active_task", "description"}
 	todoColumnsWithoutDefault = []string{"user_id", "active_task", "description"}
-	todoColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
+	todoColumnsWithDefault    = []string{"id"}
 	todoPrimaryKeyColumns     = []string{"id"}
 )
 
@@ -746,16 +711,6 @@ func (o *Todo) Insert(ctx context.Context, exec boil.ContextExecutor, columns bo
 	}
 
 	var err error
-	if !boil.TimestampsAreSkipped(ctx) {
-		currTime := time.Now().In(boil.GetLocation())
-
-		if o.CreatedAt.IsZero() {
-			o.CreatedAt = currTime
-		}
-		if o.UpdatedAt.IsZero() {
-			o.UpdatedAt = currTime
-		}
-	}
 
 	if err := o.doBeforeInsertHooks(ctx, exec); err != nil {
 		return err
@@ -858,12 +813,6 @@ CacheNoHooks:
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
 func (o *Todo) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
-	if !boil.TimestampsAreSkipped(ctx) {
-		currTime := time.Now().In(boil.GetLocation())
-
-		o.UpdatedAt = currTime
-	}
-
 	var err error
 	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
 		return 0, err
@@ -997,14 +946,6 @@ var mySQLTodoUniqueColumns = []string{
 func (o *Todo) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
 		return errors.New("models: no todos provided for upsert")
-	}
-	if !boil.TimestampsAreSkipped(ctx) {
-		currTime := time.Now().In(boil.GetLocation())
-
-		if o.CreatedAt.IsZero() {
-			o.CreatedAt = currTime
-		}
-		o.UpdatedAt = currTime
 	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {
