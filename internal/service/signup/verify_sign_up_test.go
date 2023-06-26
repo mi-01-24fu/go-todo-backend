@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/mi-01-24fu/go-todo-backend/internal/consts"
 	"github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/signup"
 	mockSignUp "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/signup"
 	"github.com/stretchr/testify/assert"
@@ -30,15 +31,20 @@ func TestSignUpInfo_VerifySignUp(t *testing.T) {
 		LoginFlag: true,
 	}
 
+	type setup struct {
+		signUp func(*mockSignUp.MockAccessSignUp)
+		count  func(*mockSignUp.MockAccessSignUp)
+	}
+
 	type args struct {
-		signupInfo signup.NewMemberInfo
+		signupInfo signup.RegistrationRequest
 	}
 	tests := []struct {
 		name string
 		// setup関数の型定義だけする
 		// そうすることで渡される引数は統一されるものの、期待値と戻り値を
 		// 各テストケースごとにカスタマイズすることができる
-		setup       func(*mockSignUp.MockAccessSignUp)
+		setup       setup
 		args        args
 		want        signup.VerifySignUpResult
 		wantErr     bool
@@ -49,8 +55,13 @@ func TestSignUpInfo_VerifySignUp(t *testing.T) {
 			// ここではなにも実行されていない
 			// 呼び出されたときにどういった挙動をするかの設定をしているだけ
 			// 渡された引数の型MockAccessSignUpはインターフェースを満たしている
-			func(msu *mockSignUp.MockAccessSignUp) {
-				msu.EXPECT().SignUp(conversionReqBody("mifu", "inogan38@gmail.com")).Return(verifySignUpResult, nil)
+			setup{
+				func(msu *mockSignUp.MockAccessSignUp) {
+					msu.EXPECT().SignUp(conversionReqBody("mifu", "inogan38@gmail.com")).Return(verifySignUpResult, nil)
+				},
+				func(msu *mockSignUp.MockAccessSignUp) {
+					msu.EXPECT().Count("inogan38@gmail.com").Return(int64(0), nil)
+				},
 			},
 			args{
 				conversionReqBody("mifu", "inogan38@gmail.com"),
@@ -61,63 +72,81 @@ func TestSignUpInfo_VerifySignUp(t *testing.T) {
 		},
 		{
 			"準正常/NewMemberInfo{}とerrorを返却する/UserNameが空",
-			nil,
+			setup{
+				nil,
+				nil,
+			},
 			args{
 				conversionReqBody("", "inogan38@gmail.com"),
 			},
 			signup.VerifySignUpResult{},
 			true,
-			errors.New("UserName が入力されていません"),
+			errors.New(consts.EmptyUserName),
 		},
 		{
 			"準正常/NewMemberInfo{}とerrorを返却する/UserNameが2文字",
-			nil,
+			setup{
+				nil,
+				nil,
+			},
 			args{
 				conversionReqBody("mi", "inogan38@gmail.com"),
 			},
 			signup.VerifySignUpResult{},
 			true,
-			errors.New("UserName の文字数が不正です"),
+			errors.New(consts.InvalidUserNameLength),
 		},
 		{
 			"準正常/NewMemberInfo{}とerrorを返却する/UserNameが14文字",
-			nil,
+			setup{
+				nil,
+				nil,
+			},
 			args{
 				conversionReqBody("14111111111111", "inogan38@gmail.com"),
 			},
 			signup.VerifySignUpResult{},
 			true,
-			errors.New("UserName の文字数が不正です"),
+			errors.New(consts.InvalidUserNameLength),
 		},
 		{
 			"準正常/NewMemberInfo{}とerrorを返却する/MailAddressが空",
-			nil,
+			setup{
+				nil,
+				nil,
+			},
 			args{
 				conversionReqBody("mifu", ""),
 			},
 			signup.VerifySignUpResult{},
 			true,
-			errors.New("MailAddress が入力されていません"),
+			errors.New(consts.EmptyMailAddress),
 		},
 		{
 			"準正常/NewMemberInfo{}とerrorを返却する/MailAddressの形式が不正「@」",
-			nil,
+			setup{
+				nil,
+				nil,
+			},
 			args{
 				conversionReqBody("mifu", "inogan38gmail.com"),
 			},
 			signup.VerifySignUpResult{},
 			true,
-			errors.New("MailAddress の形式が正しくありません"),
+			errors.New(consts.NotMailAddressFormat),
 		},
 		{
 			"準正常/NewMemberInfo{}とerrorを返却する/MailAddressの形式が不正「.」",
-			nil,
+			setup{
+				nil,
+				nil,
+			},
 			args{
 				conversionReqBody("mifu", "inogan38@gmailcom"),
 			},
 			signup.VerifySignUpResult{},
 			true,
-			errors.New("MailAddress の形式が正しくありません"),
+			errors.New(consts.NotMailAddressFormat),
 		},
 	}
 	for _, tt := range tests {
@@ -129,11 +158,15 @@ func TestSignUpInfo_VerifySignUp(t *testing.T) {
 			// Mock版のSignUpメソッドを呼び出せる
 			// そうすることで実処理とテストで呼び出し先部分を変更することができる
 			mocksignUpRepo := mockSignUp.NewMockAccessSignUp(ctrl)
-			if tt.setup != nil {
+			if tt.setup.signUp != nil {
 				// ここで実際に各テストケースで記載しているsetup関数を呼出している
 				// 渡している引数は構造体
 				// そしてsetup関数内でテスト対象コードが渡すべき値や呼び出し先の設定をしている
-				tt.setup(mocksignUpRepo)
+				tt.setup.signUp(mocksignUpRepo)
+			}
+
+			if tt.setup.count != nil {
+				tt.setup.count(mocksignUpRepo)
 			}
 			// AccessRepoに設定しているのはmocksignUpRepo構造体
 			// mocksignUpRepo構造体はSignUpのインターフェースを満たしているため、
@@ -164,8 +197,8 @@ func TestSignUpInfo_VerifySignUp(t *testing.T) {
 	}
 }
 
-func conversionReqBody(userName, mailAddress string) signup.NewMemberInfo {
-	userInfo := signup.NewMemberInfo{
+func conversionReqBody(userName, mailAddress string) signup.RegistrationRequest {
+	userInfo := signup.RegistrationRequest{
 		UserName:    userName,
 		MailAddress: mailAddress,
 	}

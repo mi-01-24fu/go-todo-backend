@@ -35,7 +35,7 @@ func (m *MockSignUp) EXPECT() *MockSignUpMockRecorder {
 }
 
 // VerifySignUp mocks base method.
-func (m *MockSignUp) VerifySignUp(arg0 signup.NewMemberInfo) (signup.VerifySignUpResult, error) {
+func (m *MockSignUp) VerifySignUp(arg0 signup.RegistrationRequest) (signup.VerifySignUpResult, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "VerifySignUp", arg0)
 	ret0, _ := ret[0].(signup.VerifySignUpResult)

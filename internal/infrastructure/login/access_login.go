@@ -4,10 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
+	"log"
 
 	_ "github.com/go-sql-driver/mysql" // init関数を実行するためにimport
 
+	"github.com/mi-01-24fu/go-todo-backend/internal/consts"
 	"github.com/mi-01-24fu/go-todo-backend/models"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
@@ -29,8 +30,8 @@ func (r UserInfo) Get(ctx context.Context) (models.User, error) {
 
 	db, err := sql.Open("mysql", "root:root@tcp(127.0.0.1:3306)/todo_app")
 	if err != nil {
-		fmt.Println(err)
-		return models.User{}, errors.New("システム障害：大変申し訳ありませんが、一定時間間隔を空けてログインしてください。")
+		log.Print(err)
+		return models.User{}, errors.New(consts.SystemError)
 	}
 	defer db.Close()
 

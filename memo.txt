@@ -35,4 +35,4 @@ mockgen `
 -package signup
 
 
-C:\Users\mifui\Documents\go-todo-backend\internal\infrastructure\signup\access_sign_up.go
+sqlboiler mysql -c config/config.toml -o models --no-tests --wipe
