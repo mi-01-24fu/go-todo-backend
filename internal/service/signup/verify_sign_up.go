@@ -17,7 +17,7 @@ type SignUp interface {
 
 // AccessInfo は SignUpインターフェースを満たす構造体
 type AccessInfo struct {
-	AccessRepo signup.SignUpService
+	AccessRepo signup.Service
 }
 
 // VerifySignUp は 渡されたユーザー情報をもとにDB登録するための準備を行う

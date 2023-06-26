@@ -14,11 +14,11 @@ import (
 // SignUpService は SignUp, AccessSignUp インターフェースを保持する構造体
 type SignUpService struct {
 	SignUpRepo service.SignUp
-	AccessRepo signup.SignUpService
+	AccessRepo signup.Service
 }
 
 // NewSignUpService は SignUpService 構造体を返却するコンストラクタ関数
-func NewSignUpService(r service.SignUp, a signup.SignUpService) *SignUpService {
+func NewSignUpService(r service.SignUp, a signup.Service) *SignUpService {
 	return &SignUpService{
 		SignUpRepo: r,
 		AccessRepo: a,

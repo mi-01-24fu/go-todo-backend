@@ -32,8 +32,8 @@ func TestSignUpInfo_VerifySignUp(t *testing.T) {
 	}
 
 	type setup struct {
-		signUp func(*mockSignUp.MockAccessSignUp)
-		count  func(*mockSignUp.MockAccessSignUp)
+		signUp func(*mockSignUp.MockService)
+		count  func(*mockSignUp.MockService)
 	}
 
 	type args struct {
@@ -54,12 +54,12 @@ func TestSignUpInfo_VerifySignUp(t *testing.T) {
 			"正常/NewMemberInfoとnilを返却する",
 			// ここではなにも実行されていない
 			// 呼び出されたときにどういった挙動をするかの設定をしているだけ
-			// 渡された引数の型MockAccessSignUpはインターフェースを満たしている
+			// 渡された引数の型MockServiceはインターフェースを満たしている
 			setup{
-				func(msu *mockSignUp.MockAccessSignUp) {
+				func(msu *mockSignUp.MockService) {
 					msu.EXPECT().SignUp(conversionReqBody("mifu", "inogan38@gmail.com")).Return(verifySignUpResult, nil)
 				},
-				func(msu *mockSignUp.MockAccessSignUp) {
+				func(msu *mockSignUp.MockService) {
 					msu.EXPECT().Count("inogan38@gmail.com").Return(int64(0), nil)
 				},
 			},
@@ -152,12 +152,12 @@ func TestSignUpInfo_VerifySignUp(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			// mocksignUpRepoにはMockAccessSignUp構造体が入る
+			// mocksignUpRepoにはMockService構造体が入る
 			// この構造体はSignUpメソッドを定義しているインターフェースを満たす
 			// 構造体。つまりこの構造体をもとにSignUpを呼び出すと、
 			// Mock版のSignUpメソッドを呼び出せる
 			// そうすることで実処理とテストで呼び出し先部分を変更することができる
-			mocksignUpRepo := mockSignUp.NewMockAccessSignUp(ctrl)
+			mocksignUpRepo := mockSignUp.NewMockService(ctrl)
 			if tt.setup.signUp != nil {
 				// ここで実際に各テストケースで記載しているsetup関数を呼出している
 				// 渡している引数は構造体
