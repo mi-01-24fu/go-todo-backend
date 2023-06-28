@@ -12,11 +12,11 @@ import (
 )
 
 type TODOListHandler struct {
-	GetTODORepo *todo.GetService
+	GetTODORepo todo.VerifyGetTODOList
 }
 
 // NewTODOListHandler は TODOListHandler を生成して返却するコンストラクタ関数
-func NewTODOListHandler(g *todo.GetService) *TODOListHandler {
+func NewTODOListHandler(g todo.VerifyGetTODOList) *TODOListHandler {
 	return &TODOListHandler{GetTODORepo: g}
 }
 
@@ -68,24 +68,3 @@ func createResponse(w http.ResponseWriter, todoList access.GetTODOList) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(res)
 }
-
-/*
------------
-service
-パラメーターのバリデーションチェック
-
-渡されたIDがあるかどうかを確認
-なければシステムエラー
-
-渡されたIDをもとにTODOリスト取得
-配列に詰めて返却
------------
-
------------
-infrastructure
-idをもとにIDが存在しているか確認
-
-todo-list取得
------------
-
-*/

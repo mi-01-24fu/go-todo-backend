@@ -5,7 +5,7 @@ import "database/sql"
 // AccessTODO は TODOSテーブルへアクセスするためのインターフェース
 type AccessTODO interface {
 	CheckID(GetTODORequest) (bool, error)
-	GetTODOList(GetTODORequest) (GetTODOList, error)
+	GetTODO(GetTODORequest) (GetTODOList, error)
 }
 
 // AccessTODOImpl は AccessTODO を実装する構造体
@@ -36,6 +36,6 @@ func (a AccessTODOImpl) CheckID(id GetTODORequest) (bool, error) {
 }
 
 // GetTODOList は TODOS テーブルから ID に紐づく TODOList の一覧を返却する
-func (a AccessTODOImpl) GetTODOList(id GetTODORequest) (GetTODOList, error) {
+func (a AccessTODOImpl) GetTODO(id GetTODORequest) (GetTODOList, error) {
 	return GetTODOList{}, nil
 }

@@ -30,9 +30,9 @@ goの実装に関しては、PRのみChatGPTを利用し、
 -------------------------------
 下記成功
 mockgen `
--source internal\infrastructure\signup\access_sign_up.go `
--destination internal\infrastructure\signup\mock_access_sign_up.go `
--package signup
+-source internal\service\todo\verify_get_todo.go `
+-destination internal\service\todo\mock_verify_get_todo.go `
+-package todo
 
 
 sqlboiler mysql -c config/config.toml -o models --no-tests --wipe

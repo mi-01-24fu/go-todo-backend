@@ -51,11 +51,11 @@ func main() {
 	// getHandler := handlers.GetTODOService{GetTODORepo: getService}
 
 	// 構造体の初期化
-	//event := InitializeEvent(db)
+	event := InitializeEvent(db)
 
 	http.HandleFunc("/login", dbSettings.loginWire)
 	http.HandleFunc("/signUp", dbSettings.signUp)
-	//http.HandleFunc("/getTODOList", event.GetTODOList)
+	http.HandleFunc("/getTODOList", event.GetTODOList)
 	http.ListenAndServe(":8080", nil)
 }
 
