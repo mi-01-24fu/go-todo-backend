@@ -10,9 +10,13 @@ import (
 	"github.com/joho/godotenv"
 	loginHandler "github.com/mi-01-24fu/go-todo-backend/internal/handlers/login"
 	signupHandler "github.com/mi-01-24fu/go-todo-backend/internal/handlers/signup"
+
+	//TODOHandler "github.com/mi-01-24fu/go-todo-backend/internal/handlers/todo"
 	access "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/signup"
+	//accessTODO "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/todo"
 	login "github.com/mi-01-24fu/go-todo-backend/internal/service/login"
 	signup "github.com/mi-01-24fu/go-todo-backend/internal/service/signup"
+	//serviceTODO "github.com/mi-01-24fu/go-todo-backend/internal/service/todo"
 )
 
 type dbConfig struct {
@@ -46,16 +50,16 @@ func main() {
 	defer db.Close()
 
 	// ---結局のところInitializeEventでやっていることは同じ---
-	// databaseSetup := getTODO.AccessTODOImpl{DB: db}
-	// getService := todo.GetService{AccessRepository: databaseSetup}
-	// getHandler := handlers.GetTODOService{GetTODORepo: getService}
+	// databaseSetup := accessTODO.AccessTODOImpl{DB: db}
+	// getService := serviceTODO.GetService{AccessTODORepo: databaseSetup}
+	// getHandler := TODOHandler.TODOListHandler{GetTODORepo: getService}
 
 	// 構造体の初期化
-	event := InitializeEvent(db)
+	//event := InitializeEvent(db)
 
 	http.HandleFunc("/login", dbSettings.loginWire)
 	http.HandleFunc("/signUp", dbSettings.signUp)
-	http.HandleFunc("/getTODOList", event.GetTODOList)
+	//	http.HandleFunc("/getTODOList", getHandler.GetTODOList)
 	http.ListenAndServe(":8080", nil)
 }
 
