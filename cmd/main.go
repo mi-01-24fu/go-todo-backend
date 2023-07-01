@@ -12,7 +12,7 @@ import (
 
 	"github.com/joho/godotenv"
 	handlerAddition "github.com/mi-01-24fu/go-todo-backend/internal/handlers/addition"
-	handlerGetList "github.com/mi-01-24fu/go-todo-backend/internal/handlers/get_list"
+	handlerGetList "github.com/mi-01-24fu/go-todo-backend/internal/handlers/getlist"
 	loginHandler "github.com/mi-01-24fu/go-todo-backend/internal/handlers/login"
 	signupHandler "github.com/mi-01-24fu/go-todo-backend/internal/handlers/signup"
 
@@ -34,8 +34,8 @@ type dbConfig struct {
 
 // event は各機能の依存関係を管理する構造体
 type event struct {
-	getEvent *handlerGetList.GetListHandler
-	addEvent *handlerAddition.AdditionImple
+	getEvent *handlerGetList.TODOGetHandler
+	addEvent *handlerAddition.TaskAdditionImpl
 }
 
 func main() {
@@ -55,7 +55,7 @@ func main() {
 	// http.HandleFunc("/login", dbSettings.loginWire)
 	// http.HandleFunc("/signUp", dbSettings.signUp)
 	http.HandleFunc("/getList", event.getEvent.GetTODOList)
-	http.HandleFunc("/addition", event.addEvent.AdditionTask)
+	http.HandleFunc("/addition", event.addEvent.TaskAddition)
 	http.ListenAndServe(":8080", nil)
 }
 

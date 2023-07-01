@@ -7,27 +7,27 @@ import (
 	"database/sql"
 	"github.com/google/wire"
 	handlerAddition "github.com/mi-01-24fu/go-todo-backend/internal/handlers/addition"
-	handlerGetList "github.com/mi-01-24fu/go-todo-backend/internal/handlers/get_list"
+	handlerGetList "github.com/mi-01-24fu/go-todo-backend/internal/handlers/getlist"
 	"github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/addition"
-	getList "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/get_list"
+	getList "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/getlist"
 	serviceAddition "github.com/mi-01-24fu/go-todo-backend/internal/service/addition"
-	serviceGetList "github.com/mi-01-24fu/go-todo-backend/internal/service/get_list"
+	serviceGetList "github.com/mi-01-24fu/go-todo-backend/internal/service/getlist"
 )
 
-func initializeGetListEvent(db *sql.DB) *handlerGetList.GetListHandler {
+func initializeGetListEvent(db *sql.DB) *handlerGetList.TODOGetHandler {
 	wire.Build(
 		getList.NewAccessTODOImpl,
 		serviceGetList.NewGetService,
 		handlerGetList.NewGetListHandler,
 	)
-	return &handlerGetList.GetListHandler{}
+	return &handlerGetList.TODOGetHandler{}
 }
 
-func initializeAdditionEvent(db *sql.DB) *handlerAddition.AdditionImple {
+func initializeAdditionEvent(db *sql.DB) *handlerAddition.TaskAdditionImpl {
 	wire.Build(
 		addition.NewAdditionTaskImpl,
 		serviceAddition.NewVerifyAdditionImpl,
 		handlerAddition.NewAdditionImple,
 	)
-	return &handlerAddition.AdditionImple{}
+	return &handlerAddition.TaskAdditionImpl{}
 }

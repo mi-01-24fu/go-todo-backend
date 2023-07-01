@@ -2,13 +2,13 @@
 // Source: internal\service\get_list\verify_get_list.go
 
 // Package get_list is a generated GoMock package.
-package get_list
+package getlist
 
 import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	get_list "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/get_list"
+	get_list "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/getlist"
 )
 
 // MockVerifyGetTODOList is a mock of VerifyGetTODOList interface.

@@ -1,4 +1,4 @@
-package get_list
+package getlist
 
 import (
 	"context"
@@ -33,6 +33,7 @@ type GetTODOList struct {
 	Description string
 }
 
+// GetLists は DB から取得したデータをスライスで保持する
 type GetLists []GetTODOList
 
 // NewAccessTODOImpl は AccessTODOImpl を生成して返却するコンストラクタ関数
@@ -60,7 +61,7 @@ func (a AccessTODOImpl) CheckID(requestData GetTODORequest) (bool, error) {
 	return true, nil
 }
 
-// GetTODO は TODOS テーブルから ID に紐づく TODOList の一覧を返却する
+// GetTODOList は TODOS テーブルから ID に紐づく TODOList の一覧を返却する
 func (a AccessTODOImpl) GetTODOList(requestData GetTODORequest) (GetLists, error) {
 
 	ctx := context.Background()

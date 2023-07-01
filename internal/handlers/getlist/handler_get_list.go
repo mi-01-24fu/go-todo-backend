@@ -1,4 +1,4 @@
-package get_list
+package getlist
 
 import (
 	"encoding/json"
@@ -8,22 +8,22 @@ import (
 	"net/http"
 
 	"github.com/mi-01-24fu/go-todo-backend/internal/consts"
-	access "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/get_list"
-	getList "github.com/mi-01-24fu/go-todo-backend/internal/service/get_list"
+	access "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/getlist"
+	getList "github.com/mi-01-24fu/go-todo-backend/internal/service/getlist"
 )
 
-// GetListHandler は VerifyGetTODOList を保持する構造体
-type GetListHandler struct {
+// TODOGetHandler は VerifyGetTODOList を保持する構造体
+type TODOGetHandler struct {
 	GetTODORepo getList.VerifyGetTODOList
 }
 
 // NewGetListHandler は GetListHandler を生成して返却するコンストラクタ関数
-func NewGetListHandler(g getList.VerifyGetTODOList) *GetListHandler {
-	return &GetListHandler{GetTODORepo: g}
+func NewGetListHandler(g getList.VerifyGetTODOList) *TODOGetHandler {
+	return &TODOGetHandler{GetTODORepo: g}
 }
 
 // GetTODOList は TODOList を取得するためのハンドラ関数
-func (g GetListHandler) GetTODOList(w http.ResponseWriter, req *http.Request) {
+func (g TODOGetHandler) GetTODOList(w http.ResponseWriter, req *http.Request) {
 
 	// リクエストデータが読み取れるか確認
 	todoRequest, err := checkGetTODOInput(req)

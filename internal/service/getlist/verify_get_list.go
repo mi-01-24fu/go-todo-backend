@@ -1,11 +1,10 @@
-package get_list
+package getlist
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/mi-01-24fu/go-todo-backend/internal/consts"
-	access "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/get_list"
+	access "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/getlist"
 )
 
 // VerifyGetTODOList は TODOListを取得するインターフェース
@@ -32,37 +31,26 @@ type ResponseList struct {
 // GetTODOList は TODOList を取得する
 func (g GetService) GetTODOList(req access.GetTODORequest) (ResponseList, error) {
 
-	fmt.Println("--1--")
-
 	err := checkValidation(req)
 	if err != nil {
 		return ResponseList{}, err
 	}
-	fmt.Println("--2--")
 
 	emptyRecord, err := g.AccessTODORepo.CheckID(req)
 	if err != nil {
 		return ResponseList{}, err
 	}
 
-	fmt.Println("--3--")
-
 	if !emptyRecord {
 		return ResponseList{nil, false}, nil
 	}
-
-	fmt.Println("--4--")
 
 	getList, err := g.AccessTODORepo.GetTODOList(req)
 	if err != nil {
 		return ResponseList{}, err
 	}
 
-	fmt.Println("--5--")
-
 	responseData := createResponse(getList)
-	fmt.Println("--6--")
-
 	return responseData, nil
 }
 

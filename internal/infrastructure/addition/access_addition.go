@@ -2,18 +2,22 @@ package addition
 
 import "database/sql"
 
-type AdditionTask interface {
+// TaskAddition は TODO データを登録するためのインターフェース
+type TaskAddition interface {
 	ADD()
 }
 
-type AdditionTaskImpl struct {
+// TaskAdditionImpl は DB へ接続するための情報を格納する構造体
+type TaskAdditionImpl struct {
 	DB *sql.DB
 }
 
-func NewAdditionTaskImpl(db *sql.DB) *AdditionTaskImpl {
-	return &AdditionTaskImpl{
+// NewAdditionTaskImpl は新しい AdditionTaskImpl を作成し返却する
+func NewAdditionTaskImpl(db *sql.DB) *TaskAdditionImpl {
+	return &TaskAdditionImpl{
 		DB: db,
 	}
 }
 
-func (a AdditionTaskImpl) ADD() {}
+// ADD は TODO データを登録する
+func (a TaskAdditionImpl) ADD() {}

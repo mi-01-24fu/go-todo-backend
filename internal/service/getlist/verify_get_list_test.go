@@ -1,4 +1,4 @@
-package get_list
+package getlist
 
 import (
 	"errors"
@@ -7,7 +7,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/mi-01-24fu/go-todo-backend/internal/consts"
-	access "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/get_list"
+	access "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/getlist"
 )
 
 func TestGetService_GetTODOList(t *testing.T) {

@@ -9,11 +9,11 @@ package main
 import (
 	"database/sql"
 	"github.com/mi-01-24fu/go-todo-backend/internal/handlers/addition"
-	"github.com/mi-01-24fu/go-todo-backend/internal/handlers/get_list"
+	"github.com/mi-01-24fu/go-todo-backend/internal/handlers/getlist"
 	addition2 "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/addition"
-	get_list2 "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/get_list"
+	getlist2 "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/getlist"
 	addition3 "github.com/mi-01-24fu/go-todo-backend/internal/service/addition"
-	get_list3 "github.com/mi-01-24fu/go-todo-backend/internal/service/get_list"
+	getlist3 "github.com/mi-01-24fu/go-todo-backend/internal/service/getlist"
 )
 
 import (
@@ -22,16 +22,16 @@ import (
 
 // Injectors from wire.go:
 
-func initializeGetListEvent(db *sql.DB) *get_list.GetListHandler {
-	accessTODO := get_list2.NewAccessTODOImpl(db)
-	verifyGetTODOList := get_list3.NewGetService(accessTODO)
-	getListHandler := get_list.NewGetListHandler(verifyGetTODOList)
-	return getListHandler
+func initializeGetListEvent(db *sql.DB) *getlist.TODOGetHandler {
+	accessTODO := getlist2.NewAccessTODOImpl(db)
+	verifyGetTODOList := getlist3.NewGetService(accessTODO)
+	todoGetHandler := getlist.NewGetListHandler(verifyGetTODOList)
+	return todoGetHandler
 }
 
-func initializeAdditionEvent(db *sql.DB) *addition.AdditionImple {
-	additionTaskImpl := addition2.NewAdditionTaskImpl(db)
-	verifyAdditionImpl := addition3.NewVerifyAdditionImpl(additionTaskImpl)
-	additionImple := addition.NewAdditionImple(verifyAdditionImpl)
-	return additionImple
+func initializeAdditionEvent(db *sql.DB) *addition.TaskAdditionImpl {
+	taskAdditionImpl := addition2.NewAdditionTaskImpl(db)
+	verifyAdditionImpl := addition3.NewVerifyAdditionImpl(taskAdditionImpl)
+	additionTaskAdditionImpl := addition.NewAdditionImple(verifyAdditionImpl)
+	return additionTaskAdditionImpl
 }

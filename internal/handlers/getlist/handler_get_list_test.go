@@ -1,4 +1,4 @@
-package get_list
+package getlist
 
 import (
 	"bytes"
@@ -11,9 +11,8 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/mi-01-24fu/go-todo-backend/internal/consts"
-	access "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/get_list"
-	"github.com/mi-01-24fu/go-todo-backend/internal/service/get_list"
-	getList "github.com/mi-01-24fu/go-todo-backend/internal/service/get_list"
+	access "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/getlist"
+	"github.com/mi-01-24fu/go-todo-backend/internal/service/getlist"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -22,7 +21,6 @@ func TestTODOListHandler_GetTODOList(t *testing.T) {
 	defer ctrl.Finish()
 
 	getTODORequest := access.GetTODORequest{ID: 1}
-	//getTODOList := access.GetTODOList{ID: 1, ActiveTask: "sample", Description: "sample"}
 
 	inputJSON, _ := json.Marshal("")
 	errorReqBody := bytes.NewBufferString(string(inputJSON))
@@ -30,7 +28,7 @@ func TestTODOListHandler_GetTODOList(t *testing.T) {
 	getLists := access.GetLists{}
 	todoList := access.GetTODOList{1, 1, "activeTask", "Description"}
 	getLists = append(getLists, todoList)
-	responseList := getList.ResponseList{getLists, true}
+	responseList := getlist.ResponseList{getLists, true}
 
 	url := "http://localhost:8080/gettodo"
 
@@ -40,15 +38,15 @@ func TestTODOListHandler_GetTODOList(t *testing.T) {
 	}
 	tests := []struct {
 		name        string
-		setup       func(*getList.MockVerifyGetTODOList)
+		setup       func(*getlist.MockVerifyGetTODOList)
 		args        args
-		want        getList.ResponseList
+		want        getlist.ResponseList
 		wantErr     bool
 		errorString string
 	}{
 		{
 			"正常/TODOリストとnilを返却する",
-			func(mus *getList.MockVerifyGetTODOList) {
+			func(mus *getlist.MockVerifyGetTODOList) {
 				mus.EXPECT().GetTODOList(getTODORequest).Return(responseList, nil)
 			},
 			args{
@@ -66,32 +64,32 @@ func TestTODOListHandler_GetTODOList(t *testing.T) {
 				w:   httptest.NewRecorder(),
 				req: httptest.NewRequest(http.MethodGet, url, errorReqBody),
 			},
-			getList.ResponseList{},
+			getlist.ResponseList{},
 			true,
 			consts.BadInput,
 		},
 		{
 			"異常/GetTODOListの戻り値エラー",
-			func(mus *get_list.MockVerifyGetTODOList) {
-				mus.EXPECT().GetTODOList(getTODORequest).Return(getList.ResponseList{}, errors.New(consts.SystemError))
+			func(mus *getlist.MockVerifyGetTODOList) {
+				mus.EXPECT().GetTODOList(getTODORequest).Return(getlist.ResponseList{}, errors.New(consts.SystemError))
 			},
 			args{
 				w:   httptest.NewRecorder(),
 				req: httptest.NewRequest(http.MethodGet, url, conversionReqBody(1)),
 			},
-			getList.ResponseList{},
+			getlist.ResponseList{},
 			true,
 			consts.SystemError,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockVerifyGetTODOList := get_list.NewMockVerifyGetTODOList(ctrl)
+			mockVerifyGetTODOList := getlist.NewMockVerifyGetTODOList(ctrl)
 
 			if tt.setup != nil {
 				tt.setup(mockVerifyGetTODOList)
 			}
-			g := GetListHandler{GetTODORepo: mockVerifyGetTODOList}
+			g := TODOGetHandler{GetTODORepo: mockVerifyGetTODOList}
 
 			g.GetTODOList(tt.args.w, tt.args.req)
 
@@ -117,7 +115,7 @@ func conversionReqBody(id int) *bytes.Buffer {
 	return reqBody
 }
 
-func conversionResBody(res getList.ResponseList) *bytes.Buffer {
+func conversionResBody(res getlist.ResponseList) *bytes.Buffer {
 	responseJSON, _ := json.Marshal(&res)
 	resBody := bytes.NewBufferString(string(responseJSON))
 	return resBody

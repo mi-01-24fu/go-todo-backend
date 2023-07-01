@@ -2,7 +2,7 @@
 // Source: internal\infrastructure\get_list\access_list.go
 
 // Package get_list is a generated GoMock package.
-package get_list
+package getlist
 
 import (
 	reflect "reflect"
