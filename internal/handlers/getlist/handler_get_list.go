@@ -1,26 +1,29 @@
-package handlers
+package getlist
 
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
 	"github.com/mi-01-24fu/go-todo-backend/internal/consts"
-	access "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/todo"
-	"github.com/mi-01-24fu/go-todo-backend/internal/service/todo"
+	access "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/getlist"
+	getList "github.com/mi-01-24fu/go-todo-backend/internal/service/getlist"
 )
 
-type TODOListHandler struct {
-	GetTODORepo *todo.GetService
+// TODOGetHandler は VerifyGetTODOList を保持する構造体
+type TODOGetHandler struct {
+	GetTODORepo getList.VerifyGetTODOList
 }
 
-// NewTODOListHandler は TODOListHandler を生成して返却するコンストラクタ関数
-func NewTODOListHandler(g *todo.GetService) *TODOListHandler {
-	return &TODOListHandler{GetTODORepo: g}
+// NewGetListHandler は GetListHandler を生成して返却するコンストラクタ関数
+func NewGetListHandler(g getList.VerifyGetTODOList) *TODOGetHandler {
+	return &TODOGetHandler{GetTODORepo: g}
 }
 
-func (g TODOListHandler) GetTODOList(w http.ResponseWriter, req *http.Request) {
+// GetTODOList は TODOList を取得するためのハンドラ関数
+func (g TODOGetHandler) GetTODOList(w http.ResponseWriter, req *http.Request) {
 
 	// リクエストデータが読み取れるか確認
 	todoRequest, err := checkGetTODOInput(req)
@@ -37,6 +40,7 @@ func (g TODOListHandler) GetTODOList(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// レスポンス返却
+	fmt.Println(result)
 	createResponse(w, result)
 }
 
@@ -57,7 +61,7 @@ func checkGetTODOInput(req *http.Request) (access.GetTODORequest, error) {
 }
 
 // createResponse はレスポンスデータを加工して返却する
-func createResponse(w http.ResponseWriter, todoList access.GetTODOList) {
+func createResponse(w http.ResponseWriter, todoList getList.ResponseList) {
 	res, err := json.Marshal(todoList)
 
 	if err != nil {
@@ -68,24 +72,3 @@ func createResponse(w http.ResponseWriter, todoList access.GetTODOList) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(res)
 }
-
-/*
------------
-service
-パラメーターのバリデーションチェック
-
-渡されたIDがあるかどうかを確認
-なければシステムエラー
-
-渡されたIDをもとにTODOリスト取得
-配列に詰めて返却
------------
-
------------
-infrastructure
-idをもとにIDが存在しているか確認
-
-todo-list取得
------------
-
-*/
