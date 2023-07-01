@@ -14,7 +14,7 @@ import (
 	serviceGetList "github.com/mi-01-24fu/go-todo-backend/internal/service/get_list"
 )
 
-func InitializeGetListEvent(db *sql.DB) *handlerGetList.GetListHandler {
+func initializeGetListEvent(db *sql.DB) *handlerGetList.GetListHandler {
 	wire.Build(
 		getList.NewAccessTODOImpl,
 		serviceGetList.NewGetService,

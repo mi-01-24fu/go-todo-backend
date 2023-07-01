@@ -16,12 +16,16 @@ import (
 	get_list3 "github.com/mi-01-24fu/go-todo-backend/internal/service/get_list"
 )
 
+import (
+	_ "github.com/go-sql-driver/mysql"
+)
+
 // Injectors from wire.go:
 
-func InitializeGetListEvent(db *sql.DB) *get_list.GetListHandler {
-	accessTODOImpl := get_list2.NewAccessTODOImpl(db)
-	getService := get_list3.NewGetService(accessTODOImpl)
-	getListHandler := get_list.NewGetListHandler(getService)
+func initializeGetListEvent(db *sql.DB) *get_list.GetListHandler {
+	accessTODO := get_list2.NewAccessTODOImpl(db)
+	verifyGetTODOList := get_list3.NewGetService(accessTODO)
+	getListHandler := get_list.NewGetListHandler(verifyGetTODOList)
 	return getListHandler
 }
 
