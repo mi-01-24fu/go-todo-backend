@@ -3,7 +3,6 @@ package getlist
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -40,7 +39,6 @@ func (g TODOGetHandler) GetTODOList(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// レスポンス返却
-	fmt.Println(result)
 	createResponse(w, result)
 }
 

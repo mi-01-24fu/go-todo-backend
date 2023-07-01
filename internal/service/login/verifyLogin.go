@@ -1,4 +1,4 @@
-package service
+package login
 
 import (
 	"context"
@@ -11,23 +11,30 @@ import (
 
 // LoginRepository は ログイン可否を判定を行うインターフェース定義です
 type LoginRepository interface {
-	VerifyLogin(context.Context, login.UserInfo) (login.VerifyLoginResult, error)
+	VerifyLogin(context.Context, login.RequestUser) (login.ResponseUser, error)
 }
 
-// VerifyLoginInfo は LoginRepository インターフェースを満たす構造体
-type VerifyLoginInfo struct{}
+// LoginRepositoryImpl は LoginRepository インターフェースを満たす構造体
+type LoginRepositoryImpl struct {
+	AccessLogin login.ConfirmLogin
+}
+
+// NewLoginRepositoryImpl は新しい LoginRepositoryImpl 構造体を作成して返却する
+func NewLoginRepositoryImpl(a login.ConfirmLogin) LoginRepository {
+	return &LoginRepositoryImpl{AccessLogin: a}
+}
 
 const noRecord = "sql: no rows in result set"
 
 // VerifyLogin はログイン可否を判定します
-func (VerifyLoginInfo) VerifyLogin(ctx context.Context, loginInfo login.UserInfo) (login.VerifyLoginResult, error) {
+func (l LoginRepositoryImpl) VerifyLogin(ctx context.Context, requestUser login.RequestUser) (login.ResponseUser, error) {
 
-	user, err := loginInfo.Get(ctx)
+	user, err := l.AccessLogin.Get(ctx, requestUser)
 
 	if err != nil {
 		if err.Error() == noRecord {
 			log.Print(err)
-			return login.VerifyLoginResult{
+			return login.ResponseUser{
 				UserID:    0,
 				LoginFlag: false,
 			}, nil
@@ -35,12 +42,11 @@ func (VerifyLoginInfo) VerifyLogin(ctx context.Context, loginInfo login.UserInfo
 	}
 	if err != nil {
 		log.Print(err)
-		return login.VerifyLoginResult{}, errors.New(consts.SystemError)
+		return login.ResponseUser{}, errors.New(consts.SystemError)
 	}
 
-	returnTodoList := login.VerifyLoginResult{
-		UserID:    user.ID,
+	return login.ResponseUser{
+		UserID:    user.UserID,
 		LoginFlag: true,
-	}
-	return returnTodoList, nil
+	}, nil
 }

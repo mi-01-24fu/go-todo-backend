@@ -17,7 +17,6 @@ import (
 	signupHandler "github.com/mi-01-24fu/go-todo-backend/internal/handlers/signup"
 
 	access "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/signup"
-	login "github.com/mi-01-24fu/go-todo-backend/internal/service/login"
 	signup "github.com/mi-01-24fu/go-todo-backend/internal/service/signup"
 )
 
@@ -34,8 +33,9 @@ type dbConfig struct {
 
 // event は各機能の依存関係を管理する構造体
 type event struct {
-	getEvent *handlerGetList.TODOGetHandler
-	addEvent *handlerAddition.TaskAdditionImpl
+	loginEvent *loginHandler.VerifyLoginHandler
+	getEvent   *handlerGetList.TODOGetHandler
+	addEvent   *handlerAddition.TaskAdditionImpl
 }
 
 func main() {
@@ -52,7 +52,7 @@ func main() {
 	// 各構造体の初期化
 	event := initializeEvent(db)
 
-	// http.HandleFunc("/login", dbSettings.loginWire)
+	http.HandleFunc("/login", event.loginEvent.LoginHandler)
 	// http.HandleFunc("/signUp", dbSettings.signUp)
 	http.HandleFunc("/getList", event.getEvent.GetTODOList)
 	http.HandleFunc("/addition", event.addEvent.TaskAddition)
@@ -96,27 +96,6 @@ func (d dbConfig) generateDBConnectionString() (string, string) {
 	dbName := d.dbType
 	connectionInfo := d.user + ":" + d.password + "@" + d.protocol + "(" + d.host + ":" + d.port + ")/" + d.dbName
 	return dbName, connectionInfo
-}
-
-func (d dbConfig) loginWire(w http.ResponseWriter, req *http.Request) {
-	verifyLoginInfo := login.VerifyLoginInfo{}
-	loginService := loginHandler.Service{Repo: verifyLoginInfo}
-
-	result, err := loginService.LoginHandler(w, req)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-	}
-
-	res, err := json.Marshal(result)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(res)
 }
 
 // DBへ接続する
@@ -165,10 +144,12 @@ func (d dbConfig) signUp(w http.ResponseWriter, req *http.Request) {
 
 // initializeEvent 各構造体の初期化を行う
 func initializeEvent(db *sql.DB) *event {
+	loginEvent := initializeLoginEvent(db)
 	getEvent := initializeGetListEvent(db)
 	addEvent := initializeAdditionEvent(db)
 	return &event{
-		getEvent: getEvent,
-		addEvent: addEvent,
+		loginEvent: loginEvent,
+		getEvent:   getEvent,
+		addEvent:   addEvent,
 	}
 }

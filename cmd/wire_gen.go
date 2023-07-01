@@ -10,10 +10,13 @@ import (
 	"database/sql"
 	"github.com/mi-01-24fu/go-todo-backend/internal/handlers/addition"
 	"github.com/mi-01-24fu/go-todo-backend/internal/handlers/getlist"
+	"github.com/mi-01-24fu/go-todo-backend/internal/handlers/login"
 	addition2 "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/addition"
 	getlist2 "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/getlist"
+	login2 "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/login"
 	addition3 "github.com/mi-01-24fu/go-todo-backend/internal/service/addition"
 	getlist3 "github.com/mi-01-24fu/go-todo-backend/internal/service/getlist"
+	login3 "github.com/mi-01-24fu/go-todo-backend/internal/service/login"
 )
 
 import (
@@ -21,6 +24,13 @@ import (
 )
 
 // Injectors from wire.go:
+
+func initializeLoginEvent(db *sql.DB) *login.VerifyLoginHandler {
+	confirmLogin := login2.NewConfirmLoginImpl(db)
+	loginRepository := login3.NewLoginRepositoryImpl(confirmLogin)
+	verifyLoginHandler := login.NewVerifyLoginHandler(loginRepository)
+	return verifyLoginHandler
+}
 
 func initializeGetListEvent(db *sql.DB) *getlist.TODOGetHandler {
 	accessTODO := getlist2.NewAccessTODOImpl(db)

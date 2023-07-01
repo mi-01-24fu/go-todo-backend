@@ -30,9 +30,9 @@ goの実装に関しては、PRのみChatGPTを利用し、
 -------------------------------
 下記成功
 mockgen `
--source internal\infrastructure\get_list\access_list.go `
--destination internal\infrastructure\get_list\mock_access_list.go `
--package get_list
+-source internal\service\login\verifyLogin.go `
+-destination internal\service\login\mock_verifyLogin.go `
+-package login
 
 
 mockgen `

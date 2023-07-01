@@ -35,10 +35,10 @@ func (m *MockAccessLoginInfo) EXPECT() *MockAccessLoginInfoMockRecorder {
 }
 
 // Get mocks base method.
-func (m *MockAccessLoginInfo) Get(arg0 context.Context) (UserInfo, error) {
+func (m *MockAccessLoginInfo) Get(arg0 context.Context) (RequestUser, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", arg0)
-	ret0, _ := ret[0].(UserInfo)
+	ret0, _ := ret[0].(RequestUser)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
