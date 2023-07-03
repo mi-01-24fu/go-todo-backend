@@ -1,4 +1,4 @@
-package signup
+package verifySignup
 
 import (
 	"bytes"
@@ -11,8 +11,8 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/mi-01-24fu/go-todo-backend/internal/consts"
-	"github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/signup"
-	mock "github.com/mi-01-24fu/go-todo-backend/internal/service/signup"
+	"github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/verifySignup"
+	mock "github.com/mi-01-24fu/go-todo-backend/internal/service/verifySignup"
 )
 
 func TestSignUpService_SignUp(t *testing.T) {
@@ -32,19 +32,19 @@ func TestSignUpService_SignUp(t *testing.T) {
 		name    string
 		setup   func(*mock.MockSignUp)
 		args    args
-		want    signup.VerifySignUpResult
+		want    verifySignup.VerifySignUpResponse
 		wantErr bool
 	}{
 		{
 			"正常/VerifySignUpResultとnilを返却する",
 			func(msu *mock.MockSignUp) {
-				msu.EXPECT().VerifySignUp(signup.RegistrationRequest{UserName: "mifu", MailAddress: "inogan38@gmail.com"}).Return(signup.VerifySignUpResult{UserID: 1, LoginFlag: true}, nil)
+				msu.EXPECT().VerifySignUp(verifySignup.VerifySignUpRequest{UserName: "mifu", MailAddress: "inogan38@gmail.com"}).Return(verifySignup.VerifySignUpResponse{UserID: 1, LoginFlag: true}, nil)
 			},
 			args{
 				w:   httptest.NewRecorder(),
 				req: httptest.NewRequest(http.MethodPost, "http://localhost:8080/signup", conversionReqBody("mifu", "inogan38@gmail.com")),
 			},
-			signup.VerifySignUpResult{
+			verifySignup.VerifySignUpResponse{
 				UserID:    1,
 				LoginFlag: true,
 			},
@@ -53,13 +53,13 @@ func TestSignUpService_SignUp(t *testing.T) {
 		{
 			"準正常/VerifySignUpResult{}とerrorを返却する/UserNameが空",
 			func(msu *mock.MockSignUp) {
-				msu.EXPECT().VerifySignUp(signup.RegistrationRequest{UserName: "", MailAddress: "inogan38@gmail.com"}).Return(signup.VerifySignUpResult{}, errors.New(consts.EmptyUserName))
+				msu.EXPECT().VerifySignUp(verifySignup.VerifySignUpRequest{UserName: "", MailAddress: "inogan38@gmail.com"}).Return(verifySignup.VerifySignUpResponse{}, errors.New(consts.EmptyUserName))
 			},
 			args{
 				w:   httptest.NewRecorder(),
 				req: httptest.NewRequest(http.MethodPost, "http://localhost:8080/signup", conversionReqBody("", "inogan38@gmail.com")),
 			},
-			signup.VerifySignUpResult{
+			verifySignup.VerifySignUpResponse{
 				UserID:    0,
 				LoginFlag: false,
 			},
@@ -68,13 +68,13 @@ func TestSignUpService_SignUp(t *testing.T) {
 		{
 			"準正常/VerifySignUpResult{}とerrorを返却する/MailAddressが空",
 			func(msu *mock.MockSignUp) {
-				msu.EXPECT().VerifySignUp(signup.RegistrationRequest{UserName: "mifu", MailAddress: ""}).Return(signup.VerifySignUpResult{}, errors.New(consts.EmptyMailAddress))
+				msu.EXPECT().VerifySignUp(verifySignup.VerifySignUpRequest{UserName: "mifu", MailAddress: ""}).Return(verifySignup.VerifySignUpResponse{}, errors.New(consts.EmptyMailAddress))
 			},
 			args{
 				w:   httptest.NewRecorder(),
 				req: httptest.NewRequest(http.MethodPost, "http://localhost:8080/signup", conversionReqBody("mifu", "")),
 			},
-			signup.VerifySignUpResult{
+			verifySignup.VerifySignUpResponse{
 				UserID:    0,
 				LoginFlag: false,
 			},
@@ -87,7 +87,7 @@ func TestSignUpService_SignUp(t *testing.T) {
 				w:   httptest.NewRecorder(),
 				req: httptest.NewRequest(http.MethodPost, "http://localhost:8080/signup", nil),
 			},
-			signup.VerifySignUpResult{
+			verifySignup.VerifySignUpResponse{
 				UserID:    0,
 				LoginFlag: false,
 			},
@@ -100,7 +100,7 @@ func TestSignUpService_SignUp(t *testing.T) {
 				w:   httptest.NewRecorder(),
 				req: httptest.NewRequest(http.MethodPost, "http://localhost:8080/signup", reqBody),
 			},
-			signup.VerifySignUpResult{
+			verifySignup.VerifySignUpResponse{
 				UserID:    0,
 				LoginFlag: false,
 			},
@@ -130,7 +130,7 @@ func TestSignUpService_SignUp(t *testing.T) {
 }
 
 func conversionReqBody(userName, mailAddress string) *bytes.Buffer {
-	userInfo := signup.RegistrationRequest{
+	userInfo := verifySignup.VerifySignUpRequest{
 		UserName:    userName,
 		MailAddress: mailAddress,
 	}

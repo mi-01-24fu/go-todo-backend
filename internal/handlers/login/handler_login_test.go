@@ -3,12 +3,14 @@ package login
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/mi-01-24fu/go-todo-backend/internal/consts"
 	"github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/login"
 	service "github.com/mi-01-24fu/go-todo-backend/internal/service/login"
 	"github.com/stretchr/testify/assert"
@@ -31,8 +33,8 @@ func TestService_LoginHandler(t *testing.T) {
 	inputJSON, _ := json.Marshal(&userInfo)
 	reqBody := bytes.NewBufferString(string(inputJSON))
 
-	serviceRepoMock := service.NewMockLoginRepository(ctrl)
-	serviceRepoMock.EXPECT().VerifyLogin(gomock.Any(), userInfo).Return(verifyLoginResult, nil)
+	errorInputJSON, _ := json.Marshal("")
+	errorReqBody := bytes.NewBufferString(string(errorInputJSON))
 
 	type args struct {
 		w   *httptest.ResponseRecorder
@@ -59,10 +61,33 @@ func TestService_LoginHandler(t *testing.T) {
 			"",
 			false,
 		},
+		{
+			"異常系/リクエストデータの読み取りエラー",
+			nil,
+			args{
+				w:   httptest.NewRecorder(),
+				req: httptest.NewRequest(http.MethodPost, "http://localhost:8080/login", errorReqBody),
+			},
+			login.ResponseUser{},
+			consts.BadInput,
+			true,
+		},
+		{
+			"異常/VerifyLogin呼出しエラー",
+			func(mlr *service.MockLoginRepository) {
+				mlr.EXPECT().VerifyLogin(gomock.Any(), userInfo).Return(login.ResponseUser{}, errors.New(consts.SystemError))
+			},
+			args{
+				w:   httptest.NewRecorder(),
+				req: httptest.NewRequest(http.MethodPost, "http://localhost:8080/login", bytes.NewBufferString(string(inputJSON))),
+			},
+			login.ResponseUser{},
+			consts.SystemError,
+			true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			mockVerifyLogin := service.NewMockLoginRepository(ctrl)
 
 			if tt.setup != nil {

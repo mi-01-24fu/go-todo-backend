@@ -37,7 +37,7 @@ func (l LoginRepositoryImpl) VerifyLogin(ctx context.Context, requestUser login.
 			return login.ResponseUser{
 				UserID:    0,
 				LoginFlag: false,
-			}, nil
+			}, err
 		}
 	}
 	if err != nil {

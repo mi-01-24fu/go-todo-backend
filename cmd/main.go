@@ -14,10 +14,10 @@ import (
 	handlerAddition "github.com/mi-01-24fu/go-todo-backend/internal/handlers/addition"
 	handlerGetList "github.com/mi-01-24fu/go-todo-backend/internal/handlers/getlist"
 	loginHandler "github.com/mi-01-24fu/go-todo-backend/internal/handlers/login"
-	signupHandler "github.com/mi-01-24fu/go-todo-backend/internal/handlers/signup"
+	signupHandler "github.com/mi-01-24fu/go-todo-backend/internal/handlers/verifySignup"
 
-	access "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/signup"
-	signup "github.com/mi-01-24fu/go-todo-backend/internal/service/signup"
+	access "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/verifySignup"
+	signup "github.com/mi-01-24fu/go-todo-backend/internal/service/verifySignup"
 )
 
 // dbConfig は database に関する情報を保持する構造体
@@ -121,7 +121,7 @@ func (d dbConfig) signUp(w http.ResponseWriter, req *http.Request) {
 	}
 	defer db.Close()
 
-	accessRepo := access.ServiceImpl{DB: db}
+	accessRepo := access.AccessVerifySignUpImpl{DB: db}
 	signUpRepo := signup.AccessInfo{AccessRepo: accessRepo}
 	signUpService := signupHandler.NewSignUpService(signUpRepo, accessRepo)
 	result, err := signUpService.SignUp(w, req)

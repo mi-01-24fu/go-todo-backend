@@ -1,57 +1,102 @@
 package login
 
-// import (
-// 	"context"
-// 	"testing"
+import (
+	"context"
+	"errors"
+	"testing"
 
-// 	"github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/login"
-// 	"github.com/mi-01-24fu/go-todo-backend/internal/service"
-// )
+	gomock "github.com/golang/mock/gomock"
+	"github.com/mi-01-24fu/go-todo-backend/internal/consts"
+	access "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/login"
+	login "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/login"
+)
 
-// func TestVerifyLogin(t *testing.T) {
+func TestVerifyLogin(t *testing.T) {
 
-// 	// ctrl := gomock.NewController(t)
-// 	// defer ctrl.Finish()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-// 	// repoMock := login.NewMockAccessLoginInfo(ctrl)
-// 	// repoMock.EXPECT().Get(gomock.Any()).Return(models.User{ID: 1, UserName: "mifu", MailAddress: "inogan38@gmail.com"})
+	requestUser := login.RequestUser{
+		MailAddress: "inogan38@gmail.com",
+		UserName:    "mifu",
+	}
 
-// 	type args struct {
-// 		loginInfo login.UserInfo
-// 	}
-// 	tests := []struct {
-// 		name    string
-// 		ctx     context.Context
-// 		args    args
-// 		want    login.VerifyLoginResult
-// 		wantErr bool
-// 	}{
-// 		{
-// 			"正常/TodoListとnilを返却する",
-// 			context.Background(),
-// 			args{
-// 				login.UserInfo{
-// 					MailAddress: "inogan38@gmail.com",
-// 					UserName:    "mifu",
-// 				},
-// 			},
-// 			login.VerifyLoginResult{
-// 				UserID:    1,
-// 				LoginFlag: true,
-// 			},
-// 			false,
-// 		},
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			got, err := service.VerifyLogin(tt.ctx, tt.args.loginInfo)
-// 			if (err != nil) != tt.wantErr {
-// 				t.Errorf("VerifyLogin() error = %v, wantErr %v", err, tt.wantErr)
-// 				return
-// 			}
-// 			if got != tt.want {
-// 				t.Errorf("VerifyLogin() = %v, want %v", got, tt.want)
-// 			}
-// 		})
-// 	}
-// }
+	const noRecord = "sql: no rows in result set"
+
+	responseUser := access.ResponseUser{
+		UserID:    1,
+		LoginFlag: true,
+	}
+
+	type args struct {
+		loginInfo access.RequestUser
+	}
+	tests := []struct {
+		name        string
+		setup       func(*access.MockConfirmLogin)
+		ctx         context.Context
+		args        args
+		want        access.ResponseUser
+		errorString string
+		wantErr     bool
+	}{
+		{
+			"正常/TodoListとnilを返却する",
+			func(mcl *access.MockConfirmLogin) {
+				mcl.EXPECT().Get(gomock.Any(), requestUser).Return(responseUser, nil)
+			},
+			context.Background(),
+			args{
+				requestUser,
+			},
+			responseUser,
+			"",
+			false,
+		},
+		{
+			"準正常/noRecordエラー",
+			func(mcl *access.MockConfirmLogin) {
+				mcl.EXPECT().Get(gomock.Any(), requestUser).Return(login.ResponseUser{}, errors.New(noRecord))
+			},
+			context.Background(),
+			args{
+				requestUser,
+			},
+			login.ResponseUser{},
+			noRecord,
+			true,
+		},
+		{
+			"異常/Get呼出しエラー",
+			func(mcl *access.MockConfirmLogin) {
+				mcl.EXPECT().Get(gomock.Any(), requestUser).Return(login.ResponseUser{}, errors.New(consts.SystemError))
+			},
+			context.Background(),
+			args{
+				requestUser,
+			},
+			login.ResponseUser{},
+			consts.SystemError,
+			true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			mockConfirmLogin := access.NewMockConfirmLogin(ctrl)
+			if tt.setup != nil {
+				tt.setup(mockConfirmLogin)
+			}
+			l := LoginRepositoryImpl{mockConfirmLogin}
+
+			got, err := l.VerifyLogin(tt.ctx, tt.args.loginInfo)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("VerifyLogin() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("VerifyLogin() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

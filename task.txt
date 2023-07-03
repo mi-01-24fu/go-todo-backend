@@ -1,31 +1,5 @@
-todoアプリを作成する
-
-まずはログイン機能実装
-ログインIDごとに表示するTODOが違う
-
-その後TODOデータ全権取得機能実装
-
-その後データのインサート機能実装
-
-その後データのデリート機能実装
-
--------------------------------
-
-frontendはvue.js
-chatgptにやってもらう
-
--------------------------------
-
-sqlboilerを利用する
-gomockを利用する
-TDDを取り入れて開発を行っていく
-
--------------------------------
-
-dockerは利用しない
-goの実装に関しては、PRのみChatGPTを利用し、
-コードを見せてもらったりはしない
-調べて分からない部分だけ聞く
+verifySignUpでCountとmailAddress確認(aws)を行う
+signUpで新規会員登録を行う
 
 -------------------------------
 下記成功
@@ -36,8 +10,8 @@ mockgen `
 
 
 mockgen `
--source  internal\service\get_list\verify_get_list.go `
--destination internal\service\get_list\mock_verify_get_list.go `
--package get_list
+-source  internal\infrastructure\login\access_login.go `
+-destination internal\infrastructure\login\mock_access_login.go `
+-package login
 
 sqlboiler mysql -c config/config.toml -o models --no-tests --wipe
