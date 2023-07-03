@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -25,23 +24,22 @@ func NewHandlerSignUpRepo(p verifySignUp.PreparationSingUp) *HandlerSignUpRepo {
 	}
 }
 
-// SignUp はユーザー情報の登録処理をハンドリングするメソッド
-func (h *HandlerSignUpRepo) SignUp(w http.ResponseWriter, req *http.Request) (verifySignup.VerifySignUpResponse, error) {
+// VerifySignUp はユーザー情報の登録処理をハンドリングするメソッド
+func (h *HandlerSignUpRepo) VerifySignUp(w http.ResponseWriter, req *http.Request) {
 
 	ctx := context.Background()
 
 	// リクエストデータの存在有無チェック
 	signupInfo, err := checkSignUpInput(req)
 	if err != nil {
-		return verifySignup.VerifySignUpResponse{}, err
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
-	result, err := h.SingUpServiceRepo.VerifySignUp(ctx, signupInfo)
-	fmt.Println(result)
+	responseData, err := h.SingUpServiceRepo.VerifySignUp(ctx, signupInfo)
 	if err != nil {
-		return verifySignup.VerifySignUpResponse{}, err
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-	return verifySignup.VerifySignUpResponse{}, nil
+	createResponse(w, responseData)
 }
 
 // checkRequestData は望むリクエストデータが送られてきているかを確認します
@@ -52,10 +50,23 @@ func checkSignUpInput(req *http.Request) (verifySignup.VerifySignUpRequest, erro
 		return verifySignup.VerifySignUpRequest{}, errors.New(consts.BadInput)
 	}
 
-	var signUpInfo verifySignup.VerifySignUpRequest
+	var requestData verifySignup.VerifySignUpRequest
 
-	if err := json.Unmarshal(body, &signUpInfo); err != nil {
+	if err := json.Unmarshal(body, &requestData); err != nil {
 		return verifySignup.VerifySignUpRequest{}, errors.New(consts.BadInput)
 	}
-	return signUpInfo, nil
+	return requestData, nil
+}
+
+// createResponse はレスポンスデータを加工して返却する
+func createResponse(w http.ResponseWriter, responseData verifySignup.VerifySignUpResponse) {
+	res, err := json.Marshal(responseData)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(res)
 }

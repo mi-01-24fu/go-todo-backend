@@ -27,15 +27,15 @@ func NewVerifySignUpServiceImpl(db *sql.DB) *AccessVerifySignUpImpl {
 	return &AccessVerifySignUpImpl{DB: db}
 }
 
-// VerifySignUpResponse は クライアントから渡されたユーザー情報をもとにDBへデータを登録した結果を格納します
-type VerifySignUpResponse struct {
-	AuthenticationNumber int
-}
-
 // VerifySignUpRequest は クライアントから渡されたログイン情報を保持する構造体です
 type VerifySignUpRequest struct {
 	UserName    string `json:"user_name,omitempty"`
 	MailAddress string `json:"mail_address,omitempty"`
+}
+
+// VerifySignUpResponse は クライアントから渡されたユーザー情報をもとにDBへデータを登録した結果を格納します
+type VerifySignUpResponse struct {
+	AuthenticationNumber int
 }
 
 // Count は新規会員登録者のメールアドレスが既に登録済みかを確認します
