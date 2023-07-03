@@ -2,7 +2,7 @@
 // Source: internal\infrastructure\signup\access_sign_up.go
 
 // Package signup is a generated GoMock package.
-package signup
+package verifySignup
 
 import (
 	reflect "reflect"
@@ -49,10 +49,10 @@ func (mr *MockServiceMockRecorder) Count(arg0 interface{}) *gomock.Call {
 }
 
 // SignUp mocks base method.
-func (m *MockService) SignUp(arg0 RegistrationRequest) (VerifySignUpResult, error) {
+func (m *MockService) SignUp(arg0 VerifySignUpRequest) (VerifySignUpResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignUp", arg0)
-	ret0, _ := ret[0].(VerifySignUpResult)
+	ret0, _ := ret[0].(VerifySignUpResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

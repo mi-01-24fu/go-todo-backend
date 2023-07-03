@@ -2,13 +2,13 @@
 // Source: internal/service/signup/verify_sign_up.go
 
 // Package signup is a generated GoMock package.
-package signup
+package verifySignup
 
 import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	signup "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/signup"
+	signup "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/verifySignup"
 )
 
 // MockSignUp is a mock of SignUp interface.
@@ -35,10 +35,10 @@ func (m *MockSignUp) EXPECT() *MockSignUpMockRecorder {
 }
 
 // VerifySignUp mocks base method.
-func (m *MockSignUp) VerifySignUp(arg0 signup.RegistrationRequest) (signup.VerifySignUpResult, error) {
+func (m *MockSignUp) VerifySignUp(arg0 signup.VerifySignUpRequest) (signup.VerifySignUpResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "VerifySignUp", arg0)
-	ret0, _ := ret[0].(signup.VerifySignUpResult)
+	ret0, _ := ret[0].(signup.VerifySignUpResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

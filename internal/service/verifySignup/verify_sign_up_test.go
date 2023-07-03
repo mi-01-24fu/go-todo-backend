@@ -1,4 +1,4 @@
-package signup
+package verifySignup
 
 import (
 	"errors"
@@ -7,8 +7,8 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/mi-01-24fu/go-todo-backend/internal/consts"
-	"github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/signup"
-	mockSignUp "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/signup"
+	"github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/verifySignup"
+	mockSignUp "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/verifySignup"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,7 +26,7 @@ func TestSignUpInfo_VerifySignUp(t *testing.T) {
 	// テストは失敗する
 	defer ctrl.Finish()
 
-	verifySignUpResult := signup.VerifySignUpResult{
+	verifySignUpResult := verifySignup.VerifySignUpResponse{
 		UserID:    1,
 		LoginFlag: true,
 	}
@@ -37,7 +37,7 @@ func TestSignUpInfo_VerifySignUp(t *testing.T) {
 	}
 
 	type args struct {
-		signupInfo signup.RegistrationRequest
+		signupInfo verifySignup.VerifySignUpRequest
 	}
 	tests := []struct {
 		name string
@@ -46,7 +46,7 @@ func TestSignUpInfo_VerifySignUp(t *testing.T) {
 		// 各テストケースごとにカスタマイズすることができる
 		setup       setup
 		args        args
-		want        signup.VerifySignUpResult
+		want        verifySignup.VerifySignUpResponse
 		wantErr     bool
 		errorString error
 	}{
@@ -79,7 +79,7 @@ func TestSignUpInfo_VerifySignUp(t *testing.T) {
 			args{
 				conversionReqBody("", "inogan38@gmail.com"),
 			},
-			signup.VerifySignUpResult{},
+			verifySignup.VerifySignUpResponse{},
 			true,
 			errors.New(consts.EmptyUserName),
 		},
@@ -92,7 +92,7 @@ func TestSignUpInfo_VerifySignUp(t *testing.T) {
 			args{
 				conversionReqBody("mi", "inogan38@gmail.com"),
 			},
-			signup.VerifySignUpResult{},
+			verifySignup.VerifySignUpResponse{},
 			true,
 			errors.New(consts.InvalidUserNameLength),
 		},
@@ -105,7 +105,7 @@ func TestSignUpInfo_VerifySignUp(t *testing.T) {
 			args{
 				conversionReqBody("14111111111111", "inogan38@gmail.com"),
 			},
-			signup.VerifySignUpResult{},
+			verifySignup.VerifySignUpResponse{},
 			true,
 			errors.New(consts.InvalidUserNameLength),
 		},
@@ -118,7 +118,7 @@ func TestSignUpInfo_VerifySignUp(t *testing.T) {
 			args{
 				conversionReqBody("mifu", ""),
 			},
-			signup.VerifySignUpResult{},
+			verifySignup.VerifySignUpResponse{},
 			true,
 			errors.New(consts.EmptyMailAddress),
 		},
@@ -131,7 +131,7 @@ func TestSignUpInfo_VerifySignUp(t *testing.T) {
 			args{
 				conversionReqBody("mifu", "inogan38gmail.com"),
 			},
-			signup.VerifySignUpResult{},
+			verifySignup.VerifySignUpResponse{},
 			true,
 			errors.New(consts.NotMailAddressFormat),
 		},
@@ -144,7 +144,7 @@ func TestSignUpInfo_VerifySignUp(t *testing.T) {
 			args{
 				conversionReqBody("mifu", "inogan38@gmailcom"),
 			},
-			signup.VerifySignUpResult{},
+			verifySignup.VerifySignUpResponse{},
 			true,
 			errors.New(consts.NotMailAddressFormat),
 		},
@@ -197,8 +197,8 @@ func TestSignUpInfo_VerifySignUp(t *testing.T) {
 	}
 }
 
-func conversionReqBody(userName, mailAddress string) signup.RegistrationRequest {
-	userInfo := signup.RegistrationRequest{
+func conversionReqBody(userName, mailAddress string) verifySignup.VerifySignUpRequest {
+	userInfo := verifySignup.VerifySignUpRequest{
 		UserName:    userName,
 		MailAddress: mailAddress,
 	}
