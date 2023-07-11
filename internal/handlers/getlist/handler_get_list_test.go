@@ -117,6 +117,5 @@ func conversionReqBody(id int) *bytes.Buffer {
 
 func conversionResBody(res getlist.ResponseList) *bytes.Buffer {
 	responseJSON, _ := json.Marshal(&res)
-	resBody := bytes.NewBufferString(string(responseJSON))
-	return resBody
+	return bytes.NewBufferString(string(responseJSON))
 }

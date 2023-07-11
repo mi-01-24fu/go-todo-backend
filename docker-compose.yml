@@ -1,0 +1,66 @@
+# version, services, buildなどのキーワードはすべてdocker-composeのディレクティブ(指示子)
+
+# versionはdocker-compose.ymlの先頭に記載する
+# versionはdocker-composeのファイル構文のバージョン
+# versionによって記述構文に違いがある
+version: '3'
+
+# 使用サービス定義
+# servicesが利用するサービスの大枠であり、
+# services配下に使用する各サービスとその詳細を記載していく
+# go,mysql,Wordpressの3つをコンテナ起動させたい場合は3つ書く
+services:
+  # webサービス設定
+  # 各サービス名(この場合はweb)は任意だが、分かりやすい名前の方が良い(何のサービスを設定しているのかが分かるから)
+  web:
+    # buildディレクティブはdocker-composeに
+    # dockerimageをビルド(dockerimageを利用してdockerコンテナを作成)するために
+    # どのdockerfileを利用するかを指定する
+    # dockerimageのビルドをするために、そのもととなるdockerfileを指定することで、
+    # dockerimageの事前準備が必要なくなる
+    # (dockerimageはdockerfileから作成するため)
+    # '.'は現在のディレクトリからdockerfileを探すことを意味する(階層が違ければその階層を指定する必要がある)
+    build: .
+    # volumesはホストマシン(PC)とDockerコンテナ間でデータを共有するために使用する
+    # '.'(左側)は現在のディレクトリ(つまりdocker-compose.ymlが存在するディレクトリ)を表し、
+    # app(右側)はコンテナ内のパスを表す
+    # つまり下記の記述では指定するホストマシンのディレクトリをコンテナ内の/appディレクトリにマッピング(同期)するということを示している
+    volumes:
+      - .:/app
+    # portsディレクティブはホストマシンとコンテナ間でネットワークポートをマッピングするために使用する
+    # 8080(左側がホストマシン):8080(右側がコンテナ)
+    # 下記の場合ホストマシンのportとコンテナのportをマッピング、つまりホストマシンの
+    # localhost:8080へのaccessをコンテナ内の8080portにリダイレクトするという事を示している
+    # 例としてWordpressを起動し、Wordpressのportを8089に指定した場合、
+    # localhost:8080へアクセスするとコンテナ内の8089ポートにリダイレクトする(ホストマシンのportが8080の場合)
+    ports:
+      - "8080:8080"
+    # depend:ディペンド:頼る・依存する
+    # 下記はwebサービスがDBサービスに依存していることを示す
+    # これによりDBサービスを起動するとwebサービスも起動させることができる
+    depends_on:
+      - db
+  db:
+    # 利用するmysqlのdockerimageを指定している
+    image: mysql:5.7
+    # environment:エンバイロメント:環境
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: todo_app
+      MYSQL_USER: todo_user
+      MYSQL_PASSWORD: todo_password
+    # 前提として、コンテナとは一時的な存在であり、コンテナを削除するとコンテナ内のデータも一緒に削除されてしまう
+    # しかしmysqlなどのデータを扱うサービスでは、コンテナを削除するとデータも削除されてしまうといった部分は大きな問題となる
+    # つまり、コンテナを削除してもデータは永続化しておく必要がある。そういった場合に利用するのがボリューム
+    # ボリューム(ストレージ領域)はdocker-engine上に独立して存在しているものであり、コンテナとは無関係
+    # ボリュームを利用すると、コンテナ上の特定のディレクトリとボリュームを連携させることができる
+    # 下記の場合、/var/lib/mysql(コンテナのデータが保存される場所)をdb_data(db_dataというボリューム)に
+    # 連携さえsるということを意味している
+    # つまり、コンテナ内に保存されたデータがコンテナ外のボリュームに連携されるため、
+    # コンテナを削除してもデータは永続化される
+    volumes:
+      - db_data:/var/lib/mysql
+volumes:
+  # ここで作成するボリュームを指定している
+  # 作成ボリューム名と上記の連携させるボリューム名は一致させておく必要がある
+  db_data:

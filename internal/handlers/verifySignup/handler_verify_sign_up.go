@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	"github.com/mi-01-24fu/go-todo-backend/internal/consts"
 	"github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/verifySignup"
@@ -33,12 +34,21 @@ func (h *HandlerSignUpRepo) VerifySignUp(w http.ResponseWriter, req *http.Reques
 	signupInfo, err := checkSignUpInput(req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	responseData, err := h.SingUpServiceRepo.VerifySignUp(ctx, signupInfo)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
+
+	err = checkResponse(responseData)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	createResponse(w, responseData)
 }
 
@@ -56,6 +66,17 @@ func checkSignUpInput(req *http.Request) (verifySignup.VerifySignUpRequest, erro
 		return verifySignup.VerifySignUpRequest{}, errors.New(consts.BadInput)
 	}
 	return requestData, nil
+}
+
+// checkResponse は VerifySignUp から返却されたデータが正しいかを検証する
+func checkResponse(responseData verifySignup.VerifySignUpResponse) error {
+	const countNumber = 4
+	strNum := strconv.Itoa(responseData.AuthenticationNumber)
+
+	if len(strNum) != countNumber {
+		return errors.New(consts.SystemError)
+	}
+	return nil
 }
 
 // createResponse はレスポンスデータを加工して返却する

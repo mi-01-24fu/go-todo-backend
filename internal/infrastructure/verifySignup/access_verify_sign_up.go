@@ -5,15 +5,17 @@ import (
 	"database/sql"
 	"errors"
 	"log"
+	"math/rand"
 
 	_ "github.com/go-sql-driver/mysql" // init関数を実行するためにimport
 	"github.com/mi-01-24fu/go-todo-backend/internal/consts"
 	"github.com/mi-01-24fu/go-todo-backend/models"
 )
 
-// AccessVerifySignUp は ユーザー情報を登録するためのインターフェース
+// AccessVerifySignUp は ユーザー情報を登録するための検証を行うインターフェース
 type AccessVerifySignUp interface {
-	Count(context.Context, string) (int64, error)
+	Count(context.Context, string) error
+	TemporaryStore(context.Context, VerifySignUpRequest) (error, VerifySignUpResponse)
 	ConfirmMail(context.Context, string) error
 }
 
@@ -39,22 +41,33 @@ type VerifySignUpResponse struct {
 }
 
 // Count は新規会員登録者のメールアドレスが既に登録済みかを確認します
-func (a AccessVerifySignUpImpl) Count(ctx context.Context, mailaddress string) (int64, error) {
+func (a AccessVerifySignUpImpl) Count(ctx context.Context, mailaddress string) error {
 
 	m, err := models.Users(
 		models.UserWhere.MailAddress.EQ(mailaddress),
 	).Count(ctx, a.DB)
 
 	if err != nil {
-		return 0, errors.New(consts.SystemError)
+		return errors.New(consts.SystemError)
 	}
 
 	if m != 0 {
 		log.Print(err)
-		return 0, errors.New(consts.DuplicationMailAddress)
+		return errors.New(consts.DuplicationMailAddress)
 	}
 
-	return m, nil
+	return nil
+}
+
+func (a AccessVerifySignUpImpl) TempraryStore(ctx context.Context, requestData VerifySignUpRequest) (error, VerifySignUpResponse) {
+	const (
+		min = 1000
+		max = 10000
+	)
+	
+	randomNum := rand.Intn(max-min) + min
+
+	return nil, VerifySignUpResponse{}
 }
 
 func (a AccessVerifySignUpImpl) ConfirmMail(ctx context.Context, mailAddress string) error {

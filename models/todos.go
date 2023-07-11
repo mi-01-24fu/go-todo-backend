@@ -25,7 +25,7 @@ import (
 // Todo is an object representing the database table.
 type Todo struct {
 	ID          int         `boil:"id" json:"id" toml:"id" yaml:"id"`
-	UserID      null.Int    `boil:"user_id" json:"user_id,omitempty" toml:"user_id" yaml:"user_id,omitempty"`
+	UserID      int         `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
 	ActiveTask  string      `boil:"active_task" json:"active_task" toml:"active_task" yaml:"active_task"`
 	Description null.String `boil:"description" json:"description,omitempty" toml:"description" yaml:"description,omitempty"`
 
@@ -82,29 +82,6 @@ func (w whereHelperint) NIN(slice []int) qm.QueryMod {
 	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
 }
 
-type whereHelpernull_Int struct{ field string }
-
-func (w whereHelpernull_Int) EQ(x null.Int) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_Int) NEQ(x null.Int) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_Int) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_Int) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpernull_Int) LT(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_Int) LTE(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_Int) GT(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_Int) GTE(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
 type whereHelperstring struct{ field string }
 
 func (w whereHelperstring) EQ(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
@@ -153,12 +130,12 @@ func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
 
 var TodoWhere = struct {
 	ID          whereHelperint
-	UserID      whereHelpernull_Int
+	UserID      whereHelperint
 	ActiveTask  whereHelperstring
 	Description whereHelpernull_String
 }{
 	ID:          whereHelperint{field: "`todos`.`id`"},
-	UserID:      whereHelpernull_Int{field: "`todos`.`user_id`"},
+	UserID:      whereHelperint{field: "`todos`.`user_id`"},
 	ActiveTask:  whereHelperstring{field: "`todos`.`active_task`"},
 	Description: whereHelpernull_String{field: "`todos`.`description`"},
 }
@@ -496,9 +473,7 @@ func (todoL) LoadUser(ctx context.Context, e boil.ContextExecutor, singular bool
 		if object.R == nil {
 			object.R = &todoR{}
 		}
-		if !queries.IsNil(object.UserID) {
-			args = append(args, object.UserID)
-		}
+		args = append(args, object.UserID)
 
 	} else {
 	Outer:
@@ -508,14 +483,12 @@ func (todoL) LoadUser(ctx context.Context, e boil.ContextExecutor, singular bool
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.UserID) {
+				if a == obj.UserID {
 					continue Outer
 				}
 			}
 
-			if !queries.IsNil(obj.UserID) {
-				args = append(args, obj.UserID)
-			}
+			args = append(args, obj.UserID)
 
 		}
 	}
@@ -573,7 +546,7 @@ func (todoL) LoadUser(ctx context.Context, e boil.ContextExecutor, singular bool
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.UserID, foreign.ID) {
+			if local.UserID == foreign.ID {
 				local.R.User = foreign
 				if foreign.R == nil {
 					foreign.R = &userR{}
@@ -614,7 +587,7 @@ func (o *Todo) SetUser(ctx context.Context, exec boil.ContextExecutor, insert bo
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	queries.Assign(&o.UserID, related.ID)
+	o.UserID = related.ID
 	if o.R == nil {
 		o.R = &todoR{
 			User: related,
@@ -631,39 +604,6 @@ func (o *Todo) SetUser(ctx context.Context, exec boil.ContextExecutor, insert bo
 		related.R.Todos = append(related.R.Todos, o)
 	}
 
-	return nil
-}
-
-// RemoveUser relationship.
-// Sets o.R.User to nil.
-// Removes o from all passed in related items' relationships struct (Optional).
-func (o *Todo) RemoveUser(ctx context.Context, exec boil.ContextExecutor, related *User) error {
-	var err error
-
-	queries.SetScanner(&o.UserID, nil)
-	if _, err = o.Update(ctx, exec, boil.Whitelist("user_id")); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	if o.R != nil {
-		o.R.User = nil
-	}
-	if related == nil || related.R == nil {
-		return nil
-	}
-
-	for i, ri := range related.R.Todos {
-		if queries.Equal(o.UserID, ri.UserID) {
-			continue
-		}
-
-		ln := len(related.R.Todos)
-		if ln > 1 && i < ln-1 {
-			related.R.Todos[i] = related.R.Todos[ln-1]
-		}
-		related.R.Todos = related.R.Todos[:ln-1]
-		break
-	}
 	return nil
 }
 

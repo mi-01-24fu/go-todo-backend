@@ -2,8 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -14,10 +12,6 @@ import (
 	handlerAddition "github.com/mi-01-24fu/go-todo-backend/internal/handlers/addition"
 	handlerGetList "github.com/mi-01-24fu/go-todo-backend/internal/handlers/getlist"
 	loginHandler "github.com/mi-01-24fu/go-todo-backend/internal/handlers/login"
-	signupHandler "github.com/mi-01-24fu/go-todo-backend/internal/handlers/verifySignup"
-
-	access "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/verifySignup"
-	signup "github.com/mi-01-24fu/go-todo-backend/internal/service/verifySignup"
 )
 
 // dbConfig は database に関する情報を保持する構造体
@@ -69,8 +63,6 @@ func dbConnection() *sql.DB {
 	dbName, connectionInfo := dbSettings.generateDBConnectionString()
 
 	// DB接続
-	fmt.Println(dbName)
-	fmt.Println(connectionInfo)
 	db, err := dbOpen(dbName, connectionInfo)
 	if err != nil {
 		panic("システムエラー")
@@ -100,46 +92,12 @@ func (d dbConfig) generateDBConnectionString() (string, string) {
 
 // DBへ接続する
 func dbOpen(dbName, connectionInfo string) (*sql.DB, error) {
-	fmt.Println(dbName)
-	fmt.Println(connectionInfo)
 	db, err := sql.Open(dbName, connectionInfo)
 	if err != nil {
 		log.Print(err)
 		return nil, err
 	}
 	return db, nil
-}
-
-func (d dbConfig) signUp(w http.ResponseWriter, req *http.Request) {
-
-	dbName, connectionInfo := d.generateDBConnectionString()
-	db, err := sql.Open(dbName, connectionInfo)
-	if err != nil {
-		log.Print(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
-
-	accessRepo := access.AccessVerifySignUpImpl{DB: db}
-	signUpRepo := signup.AccessInfo{AccessRepo: accessRepo}
-	signUpService := signupHandler.NewSignUpService(signUpRepo, accessRepo)
-	result, err := signUpService.SignUp(w, req)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	res, err := json.Marshal(result)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(res)
 }
 
 // initializeEvent 各構造体の初期化を行う

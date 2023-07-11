@@ -2,11 +2,13 @@ package verifySignup
 
 import (
 	"context"
+	"math/rand"
 	"errors"
 	"log"
 
 	commonMailAddress "github.com/mi-01-24fu/go-todo-backend/internal/common/mailaddress"
 	commonUserName "github.com/mi-01-24fu/go-todo-backend/internal/common/username"
+	"github.com/mi-01-24fu/go-todo-backend/internal/configuration"
 	"github.com/mi-01-24fu/go-todo-backend/internal/consts"
 	"github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/verifySignup"
 )
@@ -38,12 +40,34 @@ func (s PreparationSingUpImpl) VerifySignUp(ctx context.Context, requestData ver
 	}
 
 	// メールアドレスの重複確認
-	count, err := s.AccessSignUpRepo.Count(ctx, requestData.MailAddress)
-	log.Print(count)
+	err = s.AccessSignUpRepo.Count(ctx, requestData.MailAddress)
 	if err != nil {
 		log.Print(err)
 		return verifySignup.VerifySignUpResponse{}, err
 	}
+
+	useSESFlag, err := configuration.UseSES()
+	if err != nil {
+		log.Print(err)
+		return verifySignup.VerifySignUpResponse{}, err
+	}
+
+	// flag判定 true
+	if useSESFlag {
+		// 乱数作成
+
+		// 仮会員登録(ユーザー名,mailAddressを登録するがフラグがfalse)
+		// ConfirmMail呼出し
+		// 乱数とctxとユーザー名、mailAddressを渡す
+		// htmlテンプレート作成
+		// レスポンス返却(乱数)
+		log.Print(err)
+	} else {
+		// flag判定 false
+		// awsを利用しない場合は新規会員登録完了
+		// AWS SESを利用しない場合は新規下院登録完了なので、それをフロントに知らせるflagも必要
+	}
+
 	return verifySignup.VerifySignUpResponse{}, nil
 }
 
