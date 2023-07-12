@@ -79,7 +79,7 @@ func (a AccessTODOImpl) GetTODOList(requestData GetTODORequest) (GetLists, error
 	for _, todo := range todoList {
 		todoList := GetTODOList{
 			todo.ID,
-			todo.UserID.Int,
+			todo.UserID,
 			todo.ActiveTask,
 			todo.Description.String,
 		}

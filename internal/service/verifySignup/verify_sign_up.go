@@ -7,6 +7,7 @@ import (
 
 	commonMailAddress "github.com/mi-01-24fu/go-todo-backend/internal/common/mailaddress"
 	commonUserName "github.com/mi-01-24fu/go-todo-backend/internal/common/username"
+	"github.com/mi-01-24fu/go-todo-backend/internal/configuration"
 	"github.com/mi-01-24fu/go-todo-backend/internal/consts"
 	"github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/verifySignup"
 )
@@ -38,12 +39,42 @@ func (s PreparationSingUpImpl) VerifySignUp(ctx context.Context, requestData ver
 	}
 
 	// メールアドレスの重複確認
-	count, err := s.AccessSignUpRepo.Count(ctx, requestData.MailAddress)
-	log.Print(count)
+	err = s.AccessSignUpRepo.Count(ctx, requestData.MailAddress)
 	if err != nil {
 		log.Print(err)
 		return verifySignup.VerifySignUpResponse{}, err
 	}
+
+	useSESFlag, err := configuration.UseSES()
+	if err != nil {
+		log.Print(err)
+		return verifySignup.VerifySignUpResponse{}, err
+	}
+
+	// flag判定 true
+	if useSESFlag {
+
+		// 仮会員登録(ユーザー名,mailAddressを登録するがフラグがfalse)
+		verifyNumber, err := s.AccessSignUpRepo.TemporaryStore(ctx, requestData)
+		if err != nil {
+			log.Print(err)
+			return verifySignup.VerifySignUpResponse{}, errors.New(consts.SystemError)
+		}
+
+		// 検証用メールアドレス送信
+		err = s.AccessSignUpRepo.ConfirmMail(ctx, verifyNumber.AuthenticationNumber, requestData)
+		if err != nil {
+			log.Print(err)
+			return verifySignup.VerifySignUpResponse{}, errors.New(consts.SystemError)
+		}
+		return verifyNumber, nil
+
+	} else {
+		// flag判定 false
+		// awsを利用しない場合は新規会員登録完了
+		// AWS SESを利用しない場合は新規下院登録完了なので、それをフロントに知らせるflagも必要
+	}
+
 	return verifySignup.VerifySignUpResponse{}, nil
 }
 

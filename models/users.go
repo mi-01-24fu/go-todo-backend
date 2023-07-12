@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -23,44 +24,117 @@ import (
 
 // User is an object representing the database table.
 type User struct {
-	ID          int    `boil:"id" json:"id" toml:"id" yaml:"id"`
-	UserName    string `boil:"user_name" json:"user_name" toml:"user_name" yaml:"user_name"`
-	MailAddress string `boil:"mail_address" json:"mail_address" toml:"mail_address" yaml:"mail_address"`
+	ID           int       `boil:"id" json:"id" toml:"id" yaml:"id"`
+	UserName     string    `boil:"user_name" json:"user_name" toml:"user_name" yaml:"user_name"`
+	MailAddress  string    `boil:"mail_address" json:"mail_address" toml:"mail_address" yaml:"mail_address"`
+	// 0:仮登録完了 1:登録完了
+	SignupFlag   string    `boil:"signup_flag" json:"signup_flag" toml:"signup_flag" yaml:"signup_flag"`
+	VerifyNumber null.Int  `boil:"verify_number" json:"verify_number,omitempty" toml:"verify_number" yaml:"verify_number,omitempty"`
+	CreatedAt    time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt    time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
 	R *userR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var UserColumns = struct {
-	ID          string
-	UserName    string
-	MailAddress string
+	ID           string
+	UserName     string
+	MailAddress  string
+	SignupFlag   string
+	VerifyNumber string
+	CreatedAt    string
+	UpdatedAt    string
 }{
-	ID:          "id",
-	UserName:    "user_name",
-	MailAddress: "mail_address",
+	ID:           "id",
+	UserName:     "user_name",
+	MailAddress:  "mail_address",
+	SignupFlag:   "signup_flag",
+	VerifyNumber: "verify_number",
+	CreatedAt:    "created_at",
+	UpdatedAt:    "updated_at",
 }
 
 var UserTableColumns = struct {
-	ID          string
-	UserName    string
-	MailAddress string
+	ID           string
+	UserName     string
+	MailAddress  string
+	SignupFlag   string
+	VerifyNumber string
+	CreatedAt    string
+	UpdatedAt    string
 }{
-	ID:          "users.id",
-	UserName:    "users.user_name",
-	MailAddress: "users.mail_address",
+	ID:           "users.id",
+	UserName:     "users.user_name",
+	MailAddress:  "users.mail_address",
+	SignupFlag:   "users.signup_flag",
+	VerifyNumber: "users.verify_number",
+	CreatedAt:    "users.created_at",
+	UpdatedAt:    "users.updated_at",
 }
 
 // Generated where
 
+type whereHelpernull_Int struct{ field string }
+
+func (w whereHelpernull_Int) EQ(x null.Int) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_Int) NEQ(x null.Int) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_Int) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_Int) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_Int) LT(x null.Int) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_Int) LTE(x null.Int) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_Int) GT(x null.Int) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_Int) GTE(x null.Int) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
+type whereHelpertime_Time struct{ field string }
+
+func (w whereHelpertime_Time) EQ(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
+}
+func (w whereHelpertime_Time) NEQ(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelpertime_Time) LT(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpertime_Time) LTE(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpertime_Time) GT(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var UserWhere = struct {
-	ID          whereHelperint
-	UserName    whereHelperstring
-	MailAddress whereHelperstring
+	ID           whereHelperint
+	UserName     whereHelperstring
+	MailAddress  whereHelperstring
+	SignupFlag   whereHelperstring
+	VerifyNumber whereHelpernull_Int
+	CreatedAt    whereHelpertime_Time
+	UpdatedAt    whereHelpertime_Time
 }{
-	ID:          whereHelperint{field: "`users`.`id`"},
-	UserName:    whereHelperstring{field: "`users`.`user_name`"},
-	MailAddress: whereHelperstring{field: "`users`.`mail_address`"},
+	ID:           whereHelperint{field: "`users`.`id`"},
+	UserName:     whereHelperstring{field: "`users`.`user_name`"},
+	MailAddress:  whereHelperstring{field: "`users`.`mail_address`"},
+	SignupFlag:   whereHelperstring{field: "`users`.`signup_flag`"},
+	VerifyNumber: whereHelpernull_Int{field: "`users`.`verify_number`"},
+	CreatedAt:    whereHelpertime_Time{field: "`users`.`created_at`"},
+	UpdatedAt:    whereHelpertime_Time{field: "`users`.`updated_at`"},
 }
 
 // UserRels is where relationship names are stored.
@@ -84,9 +158,9 @@ func (*userR) NewStruct() *userR {
 type userL struct{}
 
 var (
-	userAllColumns            = []string{"id", "user_name", "mail_address"}
-	userColumnsWithoutDefault = []string{"user_name", "mail_address"}
-	userColumnsWithDefault    = []string{"id"}
+	userAllColumns            = []string{"id", "user_name", "mail_address", "signup_flag", "verify_number", "created_at", "updated_at"}
+	userColumnsWithoutDefault = []string{"user_name", "mail_address", "signup_flag", "verify_number"}
+	userColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	userPrimaryKeyColumns     = []string{"id"}
 )
 
@@ -412,7 +486,7 @@ func (userL) LoadTodos(ctx context.Context, e boil.ContextExecutor, singular boo
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.ID) {
+				if a == obj.ID {
 					continue Outer
 				}
 			}
@@ -470,7 +544,7 @@ func (userL) LoadTodos(ctx context.Context, e boil.ContextExecutor, singular boo
 
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
-			if queries.Equal(local.ID, foreign.UserID) {
+			if local.ID == foreign.UserID {
 				local.R.Todos = append(local.R.Todos, foreign)
 				if foreign.R == nil {
 					foreign.R = &todoR{}
@@ -492,7 +566,7 @@ func (o *User) AddTodos(ctx context.Context, exec boil.ContextExecutor, insert b
 	var err error
 	for _, rel := range related {
 		if insert {
-			queries.Assign(&rel.UserID, o.ID)
+			rel.UserID = o.ID
 			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
 				return errors.Wrap(err, "failed to insert into foreign table")
 			}
@@ -513,7 +587,7 @@ func (o *User) AddTodos(ctx context.Context, exec boil.ContextExecutor, insert b
 				return errors.Wrap(err, "failed to update foreign table")
 			}
 
-			queries.Assign(&rel.UserID, o.ID)
+			rel.UserID = o.ID
 		}
 	}
 
@@ -534,80 +608,6 @@ func (o *User) AddTodos(ctx context.Context, exec boil.ContextExecutor, insert b
 			rel.R.User = o
 		}
 	}
-	return nil
-}
-
-// SetTodos removes all previously related items of the
-// user replacing them completely with the passed
-// in related items, optionally inserting them as new records.
-// Sets o.R.User's Todos accordingly.
-// Replaces o.R.Todos with related.
-// Sets related.R.User's Todos accordingly.
-func (o *User) SetTodos(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Todo) error {
-	query := "update `todos` set `user_id` = null where `user_id` = ?"
-	values := []interface{}{o.ID}
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, query)
-		fmt.Fprintln(writer, values)
-	}
-	_, err := exec.ExecContext(ctx, query, values...)
-	if err != nil {
-		return errors.Wrap(err, "failed to remove relationships before set")
-	}
-
-	if o.R != nil {
-		for _, rel := range o.R.Todos {
-			queries.SetScanner(&rel.UserID, nil)
-			if rel.R == nil {
-				continue
-			}
-
-			rel.R.User = nil
-		}
-
-		o.R.Todos = nil
-	}
-	return o.AddTodos(ctx, exec, insert, related...)
-}
-
-// RemoveTodos relationships from objects passed in.
-// Removes related items from R.Todos (uses pointer comparison, removal does not keep order)
-// Sets related.R.User.
-func (o *User) RemoveTodos(ctx context.Context, exec boil.ContextExecutor, related ...*Todo) error {
-	if len(related) == 0 {
-		return nil
-	}
-
-	var err error
-	for _, rel := range related {
-		queries.SetScanner(&rel.UserID, nil)
-		if rel.R != nil {
-			rel.R.User = nil
-		}
-		if _, err = rel.Update(ctx, exec, boil.Whitelist("user_id")); err != nil {
-			return err
-		}
-	}
-	if o.R == nil {
-		return nil
-	}
-
-	for _, rel := range related {
-		for i, ri := range o.R.Todos {
-			if rel != ri {
-				continue
-			}
-
-			ln := len(o.R.Todos)
-			if ln > 1 && i < ln-1 {
-				o.R.Todos[i] = o.R.Todos[ln-1]
-			}
-			o.R.Todos = o.R.Todos[:ln-1]
-			break
-		}
-	}
-
 	return nil
 }
 
@@ -655,6 +655,16 @@ func (o *User) Insert(ctx context.Context, exec boil.ContextExecutor, columns bo
 	}
 
 	var err error
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = currTime
+		}
+		if o.UpdatedAt.IsZero() {
+			o.UpdatedAt = currTime
+		}
+	}
 
 	if err := o.doBeforeInsertHooks(ctx, exec); err != nil {
 		return err
@@ -757,6 +767,12 @@ CacheNoHooks:
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
 func (o *User) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		o.UpdatedAt = currTime
+	}
+
 	var err error
 	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
 		return 0, err
@@ -883,7 +899,6 @@ func (o UserSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, col
 
 var mySQLUserUniqueColumns = []string{
 	"id",
-	"mail_address",
 }
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.
@@ -891,6 +906,14 @@ var mySQLUserUniqueColumns = []string{
 func (o *User) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
 		return errors.New("models: no users provided for upsert")
+	}
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = currTime
+		}
+		o.UpdatedAt = currTime
 	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {

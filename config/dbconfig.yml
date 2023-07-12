@@ -1,0 +1,4 @@
+development:
+  dialect: mysql
+  dir: ../internal/migrations
+  datasource: root:root@tcp(127.0.0.1:3306)/todo_app?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=true

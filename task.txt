@@ -2,16 +2,14 @@ verifySignUpでCountとmailAddress確認(aws)を行う
 signUpで新規会員登録を行う
 
 -------------------------------
-下記成功
-mockgen `
--source internal\service\login\verifyLogin.go `
--destination internal\service\login\mock_verifyLogin.go `
--package login
-
+mock生成コマンド
 
 mockgen `
--source  internal\infrastructure\login\access_login.go `
--destination internal\infrastructure\login\mock_access_login.go `
--package login
+-source internal\service\verifySignup\verify_sign_up.go `
+-destination internal\service\verifySignup\mock_verify_sign_up.go `
+-package verifySignup
+
+-------------------------------
+新規テーブル作成コマンド
 
 sqlboiler mysql -c config/config.toml -o models --no-tests --wipe

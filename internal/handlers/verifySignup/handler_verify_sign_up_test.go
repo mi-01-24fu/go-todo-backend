@@ -2,139 +2,132 @@ package verifySignup
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
-	"errors"
 	"net/http"
 	"net/http/httptest"
-	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/golang/mock/gomock"
 	"github.com/mi-01-24fu/go-todo-backend/internal/consts"
-	"github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/verifySignup"
-	mock "github.com/mi-01-24fu/go-todo-backend/internal/service/verifySignup"
+	access "github.com/mi-01-24fu/go-todo-backend/internal/infrastructure/verifySignup"
+	"github.com/mi-01-24fu/go-todo-backend/internal/service/verifySignup"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestSignUpService_SignUp(t *testing.T) {
-
-	inputJSON, _ := json.Marshal("")
-	reqBody := bytes.NewBufferString(string(inputJSON))
+func TestHandlerSignUpRepo_VerifySignUp(t *testing.T) {
 
 	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
+	mockPreparationSingUp := verifySignup.NewMockPreparationSingUp(ctrl)
+	mockHandlerSignUpRepo := NewHandlerSignUpRepo(mockPreparationSingUp)
+
+	verifySignUpRequest := access.VerifySignUpRequest{
+		UserName:    "mifu",
+		MailAddress: "inogan38@gmail.com",
+	}
+
+	goodVerifySignUpResponse := access.VerifySignUpResponse{
+		AuthenticationNumber: 1234,
+	}
+
+	badVerifySignUpResponse := access.VerifySignUpResponse{
+		AuthenticationNumber: 123,
+	}
+
+	url := "http://localhost:8080/verify-signup"
 
 	type args struct {
-		w   http.ResponseWriter
+		w   *httptest.ResponseRecorder
 		req *http.Request
 	}
-
 	tests := []struct {
-		name    string
-		setup   func(*mock.MockSignUp)
-		args    args
-		want    verifySignup.VerifySignUpResponse
-		wantErr bool
+		name      string
+		setup     func(*verifySignup.MockPreparationSingUp)
+		h         *HandlerSignUpRepo
+		args      args
+		want      access.VerifySignUpResponse
+		wantErr   bool
+		errString string
 	}{
 		{
-			"正常/VerifySignUpResultとnilを返却する",
-			func(msu *mock.MockSignUp) {
-				msu.EXPECT().VerifySignUp(verifySignup.VerifySignUpRequest{UserName: "mifu", MailAddress: "inogan38@gmail.com"}).Return(verifySignup.VerifySignUpResponse{UserID: 1, LoginFlag: true}, nil)
+			"正常/4桁の乱数を返却する",
+			func(mpsu *verifySignup.MockPreparationSingUp) {
+				mpsu.EXPECT().VerifySignUp(context.Background(), verifySignUpRequest).Return(goodVerifySignUpResponse, nil)
 			},
+			mockHandlerSignUpRepo,
 			args{
-				w:   httptest.NewRecorder(),
-				req: httptest.NewRequest(http.MethodPost, "http://localhost:8080/signup", conversionReqBody("mifu", "inogan38@gmail.com")),
+				// http.ResponseWriter はレスポンスを返却するためのメソッドを
+				// 提供するインターフェース
+				// そして httptest.NewRecorder() は http.ResponseWriter インターフェースを
+				// 実装している ResponseRecorder 構造体を返却する
+				w: httptest.NewRecorder(),
+				// httptest.NewRequest は疑似的な HTTP リクエストを
+				// 生成できる
+				req: httptest.NewRequest(http.MethodPost, url, conversionReqBody("mifu", "inogan38@gmail.com")),
 			},
-			verifySignup.VerifySignUpResponse{
-				UserID:    1,
-				LoginFlag: true,
-			},
+			goodVerifySignUpResponse,
 			false,
+			"",
 		},
 		{
-			"準正常/VerifySignUpResult{}とerrorを返却する/UserNameが空",
-			func(msu *mock.MockSignUp) {
-				msu.EXPECT().VerifySignUp(verifySignup.VerifySignUpRequest{UserName: "", MailAddress: "inogan38@gmail.com"}).Return(verifySignup.VerifySignUpResponse{}, errors.New(consts.EmptyUserName))
+			"異常/VerifySignUpが4桁以外の数字を返却",
+			func(mpsu *verifySignup.MockPreparationSingUp) {
+				mpsu.EXPECT().VerifySignUp(context.Background(), verifySignUpRequest).Return(badVerifySignUpResponse, nil)
 			},
+			mockHandlerSignUpRepo,
 			args{
-				w:   httptest.NewRecorder(),
-				req: httptest.NewRequest(http.MethodPost, "http://localhost:8080/signup", conversionReqBody("", "inogan38@gmail.com")),
+				// http.ResponseWriter はレスポンスを返却するためのメソッドを
+				// 提供するインターフェース
+				// そして httptest.NewRecorder() は http.ResponseWriter インターフェースを
+				// 実装している ResponseRecorder 構造体を返却する
+				w: httptest.NewRecorder(),
+				// httptest.NewRequest は疑似的な HTTP リクエストを
+				// 生成できる
+				req: httptest.NewRequest(http.MethodPost, url, conversionReqBody("mifu", "inogan38@gmail.com")),
 			},
-			verifySignup.VerifySignUpResponse{
-				UserID:    0,
-				LoginFlag: false,
-			},
+			badVerifySignUpResponse,
 			true,
-		},
-		{
-			"準正常/VerifySignUpResult{}とerrorを返却する/MailAddressが空",
-			func(msu *mock.MockSignUp) {
-				msu.EXPECT().VerifySignUp(verifySignup.VerifySignUpRequest{UserName: "mifu", MailAddress: ""}).Return(verifySignup.VerifySignUpResponse{}, errors.New(consts.EmptyMailAddress))
-			},
-			args{
-				w:   httptest.NewRecorder(),
-				req: httptest.NewRequest(http.MethodPost, "http://localhost:8080/signup", conversionReqBody("mifu", "")),
-			},
-			verifySignup.VerifySignUpResponse{
-				UserID:    0,
-				LoginFlag: false,
-			},
-			true,
-		},
-		{
-			"異常/VerifySignUpResult{}とerrorを返却する/RequestBodyがnil",
-			nil,
-			args{
-				w:   httptest.NewRecorder(),
-				req: httptest.NewRequest(http.MethodPost, "http://localhost:8080/signup", nil),
-			},
-			verifySignup.VerifySignUpResponse{
-				UserID:    0,
-				LoginFlag: false,
-			},
-			true,
-		},
-		{
-			"異常/VerifySignUpResult{}とerrorを返却する/RequestBodyがnil",
-			nil,
-			args{
-				w:   httptest.NewRecorder(),
-				req: httptest.NewRequest(http.MethodPost, "http://localhost:8080/signup", reqBody),
-			},
-			verifySignup.VerifySignUpResponse{
-				UserID:    0,
-				LoginFlag: false,
-			},
-			true,
+			consts.SystemError,
 		},
 	}
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			tt.setup(mockPreparationSingUp)
 
-			signUpRepoMock := mock.NewMockSignUp(ctrl)
-			if tt.setup != nil {
-				tt.setup(signUpRepoMock)
+			tt.h.VerifySignUp(tt.args.w, tt.args.req)
+
+			if !tt.wantErr {
+				assert.Equal(t, http.StatusOK, tt.args.w.Code)
+				assert.Equal(t, "application/json", tt.args.w.Header().Get("Content-Type"))
+				assert.Equal(t, conversionResBody(t, tt.want).String(), tt.args.w.Body.String())
 			}
 
-			s := SignUpService{SignUpRepo: signUpRepoMock}
-			got, err := s.SignUp(tt.args.w, tt.args.req)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("SignUpService.SignUp() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("SignUpService.SignUp() = %v, want %v", got, tt.want)
+			if tt.wantErr {
+				assert.NotEqual(t, http.StatusOK, tt.args.w.Code)
+				actualErrorMessage := strings.TrimSpace(tt.args.w.Body.String()) // strings.TrimSpace()を使用して改行を除去
+				assert.Equal(t, tt.errString, actualErrorMessage)
 			}
 		})
 	}
 }
 
+// conversionReqBody はリクエストBodyを生成する
 func conversionReqBody(userName, mailAddress string) *bytes.Buffer {
-	userInfo := verifySignup.VerifySignUpRequest{
+	verifySignUpRequest := access.VerifySignUpRequest{
 		UserName:    userName,
 		MailAddress: mailAddress,
 	}
-	inputJSON, _ := json.Marshal(&userInfo)
+	inputJSON, _ := json.Marshal(&verifySignUpRequest)
 	reqBody := bytes.NewBufferString(string(inputJSON))
 	return reqBody
+}
+
+// conversionResBody は期待するレスポンスを bytes.Buffer 型に変換する
+func conversionResBody(t *testing.T, res access.VerifySignUpResponse) *bytes.Buffer {
+	responseJSON, err := json.Marshal(&res)
+	if err != nil {
+		t.Errorf("conversionResBody() json marshal error =  %v", err)
+	}
+	return bytes.NewBufferString(string(responseJSON))
 }
