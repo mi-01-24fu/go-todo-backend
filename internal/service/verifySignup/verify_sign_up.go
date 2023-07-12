@@ -2,7 +2,6 @@ package verifySignup
 
 import (
 	"context"
-	"math/rand"
 	"errors"
 	"log"
 
@@ -54,14 +53,22 @@ func (s PreparationSingUpImpl) VerifySignUp(ctx context.Context, requestData ver
 
 	// flag判定 true
 	if useSESFlag {
-		// 乱数作成
 
 		// 仮会員登録(ユーザー名,mailAddressを登録するがフラグがfalse)
-		// ConfirmMail呼出し
-		// 乱数とctxとユーザー名、mailAddressを渡す
-		// htmlテンプレート作成
-		// レスポンス返却(乱数)
-		log.Print(err)
+		verifyNumber, err := s.AccessSignUpRepo.TemporaryStore(ctx, requestData)
+		if err != nil {
+			log.Print(err)
+			return verifySignup.VerifySignUpResponse{}, errors.New(consts.SystemError)
+		}
+
+		// 検証用メールアドレス送信
+		err = s.AccessSignUpRepo.ConfirmMail(ctx, verifyNumber.AuthenticationNumber, requestData)
+		if err != nil {
+			log.Print(err)
+			return verifySignup.VerifySignUpResponse{}, errors.New(consts.SystemError)
+		}
+		return verifyNumber, nil
+
 	} else {
 		// flag判定 false
 		// awsを利用しない場合は新規会員登録完了

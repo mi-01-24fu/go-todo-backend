@@ -27,6 +27,8 @@ type User struct {
 	ID           int       `boil:"id" json:"id" toml:"id" yaml:"id"`
 	UserName     string    `boil:"user_name" json:"user_name" toml:"user_name" yaml:"user_name"`
 	MailAddress  string    `boil:"mail_address" json:"mail_address" toml:"mail_address" yaml:"mail_address"`
+	// 0:仮登録完了 1:登録完了
+	SignupFlag   string    `boil:"signup_flag" json:"signup_flag" toml:"signup_flag" yaml:"signup_flag"`
 	VerifyNumber null.Int  `boil:"verify_number" json:"verify_number,omitempty" toml:"verify_number" yaml:"verify_number,omitempty"`
 	CreatedAt    time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt    time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
@@ -39,6 +41,7 @@ var UserColumns = struct {
 	ID           string
 	UserName     string
 	MailAddress  string
+	SignupFlag   string
 	VerifyNumber string
 	CreatedAt    string
 	UpdatedAt    string
@@ -46,6 +49,7 @@ var UserColumns = struct {
 	ID:           "id",
 	UserName:     "user_name",
 	MailAddress:  "mail_address",
+	SignupFlag:   "signup_flag",
 	VerifyNumber: "verify_number",
 	CreatedAt:    "created_at",
 	UpdatedAt:    "updated_at",
@@ -55,6 +59,7 @@ var UserTableColumns = struct {
 	ID           string
 	UserName     string
 	MailAddress  string
+	SignupFlag   string
 	VerifyNumber string
 	CreatedAt    string
 	UpdatedAt    string
@@ -62,6 +67,7 @@ var UserTableColumns = struct {
 	ID:           "users.id",
 	UserName:     "users.user_name",
 	MailAddress:  "users.mail_address",
+	SignupFlag:   "users.signup_flag",
 	VerifyNumber: "users.verify_number",
 	CreatedAt:    "users.created_at",
 	UpdatedAt:    "users.updated_at",
@@ -117,6 +123,7 @@ var UserWhere = struct {
 	ID           whereHelperint
 	UserName     whereHelperstring
 	MailAddress  whereHelperstring
+	SignupFlag   whereHelperstring
 	VerifyNumber whereHelpernull_Int
 	CreatedAt    whereHelpertime_Time
 	UpdatedAt    whereHelpertime_Time
@@ -124,6 +131,7 @@ var UserWhere = struct {
 	ID:           whereHelperint{field: "`users`.`id`"},
 	UserName:     whereHelperstring{field: "`users`.`user_name`"},
 	MailAddress:  whereHelperstring{field: "`users`.`mail_address`"},
+	SignupFlag:   whereHelperstring{field: "`users`.`signup_flag`"},
 	VerifyNumber: whereHelpernull_Int{field: "`users`.`verify_number`"},
 	CreatedAt:    whereHelpertime_Time{field: "`users`.`created_at`"},
 	UpdatedAt:    whereHelpertime_Time{field: "`users`.`updated_at`"},
@@ -150,8 +158,8 @@ func (*userR) NewStruct() *userR {
 type userL struct{}
 
 var (
-	userAllColumns            = []string{"id", "user_name", "mail_address", "verify_number", "created_at", "updated_at"}
-	userColumnsWithoutDefault = []string{"user_name", "mail_address", "verify_number"}
+	userAllColumns            = []string{"id", "user_name", "mail_address", "signup_flag", "verify_number", "created_at", "updated_at"}
+	userColumnsWithoutDefault = []string{"user_name", "mail_address", "signup_flag", "verify_number"}
 	userColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	userPrimaryKeyColumns     = []string{"id"}
 )
